@@ -1,0 +1,3 @@
+[submodule "python/driver"]
+	path = python/driver
+	url = https://github.com/dodo5522/tsmppt60_driver.git
