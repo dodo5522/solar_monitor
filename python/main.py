@@ -16,9 +16,9 @@ if __name__ == "__main__":
     import sys
     from driver import data
 
-    url = sys.argv[1]
+    host = sys.argv[1]
 
-    live = data.LiveData(url)
+    live = data.LiveData(host)
     for group in live._data_objects:
         for data_in_group in live._data_objects[group].get_all():
             print(data_in_group)
