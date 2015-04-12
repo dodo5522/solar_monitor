@@ -40,7 +40,7 @@ def main(args):
     api = xively.XivelyAPIClient(args.api_key)
     feed = api.feeds.get(args.feed_key)
 
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now()
     datastreams = []
 
     live = data.LiveData(args.host_name)
