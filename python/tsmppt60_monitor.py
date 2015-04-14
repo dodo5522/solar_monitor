@@ -3,6 +3,7 @@
 
 """ This is main program to test another modules. """
 
+import logging
 import time
 import threading
 import argparse
@@ -63,16 +64,32 @@ def init_args():
         default=300,
         help="Xively update interval with sec"
     )
+    arg.add_argument(
+        "--debug",
+        action='store_true',
+        default=False,
+        help="Enable debug mode"
+    )
 
     return arg.parse_args()
 
 
 def main(args):
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter(
+        "%(asctime)s %(name)s %(levelname)s: %(message)s",
+        "%Y/%m/%d %p %l:%M:%S"))
+
+    logger = logging.getLogger("main")
+    logger.addHandler(handler)
+
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+
     api = xively.XivelyAPIClient(args.api_key)
     feed = api.feeds.get(args.feed_key)
 
     def update():
-        print("update called")
         now = datetime.datetime.utcnow()
         datastreams = []
 
@@ -80,7 +97,7 @@ def main(args):
 
         for group in live._data_objects:
             for data_in_group in live._data_objects[group].get_all():
-                print(group + " : " + ", ".join(data_in_group))
+                logger.debug(group + " : " + ", ".join(data_in_group))
                 datastreams.append(
                     xively.Datastream(
                         id="".join(data_in_group[0].split()),
