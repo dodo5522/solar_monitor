@@ -6,7 +6,7 @@ CONFIG_FILE=/etc/tsmppt60_monitor/setting.conf
 PID_FILE=/var/run/tsmppt60_monitor.pid
 DAEMON=/usr/bin/python3
 #DAEMON_ARGS="-m tsmppt60_monitor -l ${LOG_FILE} -c ${CONFIG_FILE}"
-DAEMON_ARGS="-m tsmppt60_monitor -l ${LOG_FILE}"
+DAEMON_ARGS="-m tsmppt60_monitor -i 300 -a ${API_KEY} -f ${FEED}"
 SCRIPTNAME=$0
 
 do_start()
