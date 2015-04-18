@@ -9,7 +9,7 @@ import threading
 import argparse
 import datetime
 import xively
-import driver.data
+import driver.livedata
 
 __author__ = "Takashi Ando"
 __version__ = "0.0.2"
@@ -93,7 +93,7 @@ def main(args):
         now = datetime.datetime.utcnow()
         datastreams = []
 
-        live = driver.data.LiveData(args.host_name)
+        live = driver.livedata.LiveData(args.host_name)
 
         for group in live._data_objects:
             for data_in_group in live._data_objects[group].get_all():
