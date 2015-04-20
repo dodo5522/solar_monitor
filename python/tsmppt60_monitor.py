@@ -95,13 +95,13 @@ def main(args):
 
         live = driver.livedata.LiveData(args.host_name)
 
-        for group in live._data_objects:
-            for data_in_group in live._data_objects[group].get_all():
-                logger.debug(group + " : " + ", ".join(data_in_group))
+        for group in live:
+            for status_all in live[group].get_all_status():
+                logger.debug(group + ": " + ", ".join(status_all))
                 datastreams.append(
                     xively.Datastream(
-                        id="".join(data_in_group[0].split()),
-                        current_value=float(data_in_group[1]),
+                        id="".join(status_all[0].split()),
+                        current_value=float(status_all[1]),
                         at=now
                     )
                 )
