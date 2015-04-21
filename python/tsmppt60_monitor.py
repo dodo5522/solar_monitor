@@ -30,6 +30,7 @@ class Main(object):
     def __init__(self):
         self._init_args()
         self._init_logger()
+        self._init_data_handlers()
 
     def _init_args(self):
         arg = argparse.ArgumentParser(
@@ -96,15 +97,31 @@ class Main(object):
         else:
             self.logger.setLevel(logging.INFO)
 
+    def _init_data_handlers(self):
+        # FIXME: want to support some internal database like sqlite.
+        self._event_handlers = (
+            self._update_xively_with,
+        )
+
+    def _update_xively_with(self, datastreams, **kwargs):
+        """ Update xively feed with data got with get_current_streams().
+
+        Keyword arguments:
+            datastreams: list of xively.Datastream object
+        """
+        api = xively.XivelyAPIClient(self.args.api_key)
+        feed = api.feeds.get(self.args.feed_key)
+
+        feed.datastreams = datastreams
+        feed.update()
+
     def __call__(self):
         if self.args.just_get_status:
             for data in self.get_current_streams(self.args.host_name):
                 self.logger.info("id:{0}, value:{1}".format(
                     data._data["id"], data._data["current_value"]))
         else:
-            timer = RecursiveTimer(
-                self.update_db_with_current_streams,
-                self.args.interval)
+            timer = RecursiveTimer(self.monitor, self.args.interval)
 
             try:
                 timer.start()
@@ -113,21 +130,14 @@ class Main(object):
             except KeyboardInterrupt:
                 timer.cancel()
 
-    def _update_xively(self):
-        """ Update xively feed with data got with get_current_streams().
+    def monitor(self):
+        """ Monitor charge controller and update database like xively or
+            internal database. This method should be called with a timer.
         """
-        api = xively.XivelyAPIClient(self.args.api_key)
-        feed = api.feeds.get(self.args.feed_key)
+        datastreams = self.get_current_streams(self.args.host_name)
 
-        feed.datastreams = self.get_current_streams(self.args.host_name)
-        feed.update()
-
-    def update_db_with_current_streams(self):
-        """ Update database like xively or internal database.
-        """
-
-        # FIXME: want to support some internal database like sqlite.
-        self._update_xively()
+        for event_handler in self._event_handlers:
+            event_handler(datastreams)
 
     def get_current_streams(self, host_name):
         """ Get status data from charge controller and convert them to data
