@@ -109,6 +109,8 @@ class Main(object):
         self._event_handlers = (
             (self._update_xively_with,
              {}),
+            (self._update_sqlite_with,
+             {}),
             (self._hook_battery_charge,
              {"cmd": "/tmp/remote_shutdown.sh",
               "target_edge": self.EDGE_FALLING,
@@ -126,6 +128,14 @@ class Main(object):
 
         feed.datastreams = datastreams
         feed.update()
+
+    def _update_sqlite_with(self, datastreams, **kwargs):
+        """ Update interanl database with data got with get_current_streams().
+
+        Keyword arguments:
+            datastreams: list of xively.Datastream object
+        """
+        pass
 
     def _is_battery_edge_condition(
             self, cur_volt, prev_volt, target_volt, target_edge):
