@@ -151,8 +151,9 @@ class Main(object):
         Returns: xively.Datastream list
         """
         now = datetime.datetime.utcnow()
-        datastreams = []
+        self.logger.debug(now)
 
+        datastreams = []
         live = driver.livedata.LiveData(host_name)
 
         for group in live:
