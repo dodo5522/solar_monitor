@@ -177,7 +177,7 @@ class Main(object):
         return condition
 
     def _hook_battery_charge(self, datastreams,
-                             cmd=None, target_volt=0, target_edge=0):
+                             cmd=None, target_volt=0, target_edge=EDGE_NONE):
         """ Hook battery charge and run some command according to it.
 
         Keyword arguments:
