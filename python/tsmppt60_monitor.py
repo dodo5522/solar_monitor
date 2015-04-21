@@ -41,6 +41,8 @@ class RecursiveTimer(object):
 
 class Main(object):
     """ main routine class """
+    _FORMAT_LOG_MSG = "%(asctime)s %(name)s %(levelname)s: %(message)s"
+    _FORMAT_LOG_DATE = "%Y/%m/%d %p %l:%M:%S"
 
     def __init__(self):
         arg = argparse.ArgumentParser(
@@ -68,6 +70,12 @@ class Main(object):
             help="Xively update interval with sec"
         )
         arg.add_argument(
+            "-l", "--log-file",
+            type=str,
+            default=None,
+            help="log file path to output"
+        )
+        arg.add_argument(
             "--just-get-status",
             action='store_true',
             default=False,
@@ -84,11 +92,15 @@ class Main(object):
         self.logger = logging.getLogger("main")
 
         handler = logging.StreamHandler()
-        handler.setFormatter(logging.Formatter(
-            "%(asctime)s %(name)s %(levelname)s: %(message)s",
-            "%Y/%m/%d %p %l:%M:%S"))
-
+        formatter = logging.Formatter(
+            fmt=self._FORMAT_LOG_MSG, datefmt=self._FORMAT_LOG_DATE)
+        handler.setFormatter(formatter)
         self.logger.addHandler(handler)
+
+        if self.args.log_file:
+            handler = logging.FileHandler(self.args.log_file, mode="a")
+            handler.setFormatter(formatter)
+            self.logger.addHandler(handler)
 
         if self.args.debug:
             self.logger.setLevel(logging.DEBUG)
@@ -97,11 +109,13 @@ class Main(object):
 
     def __call__(self):
         if self.args.just_get_status:
-            for data in self._get_data_streams(self.args.host_name):
+            for data in self.get_current_streams(self.args.host_name):
                 self.logger.info("id:{0}, value:{1}".format(
                     data._data["id"], data._data["current_value"]))
         else:
-            timer = RecursiveTimer(self._update_xively, self.args.interval)
+            timer = RecursiveTimer(
+                self.update_db_with_current_streams,
+                self.args.interval)
 
             try:
                 timer.start()
@@ -111,15 +125,22 @@ class Main(object):
                 timer.cancel()
 
     def _update_xively(self):
-        """ Update xively feed with data got with _get_data_streams().
+        """ Update xively feed with data got with get_current_streams().
         """
         api = xively.XivelyAPIClient(self.args.api_key)
         feed = api.feeds.get(self.args.feed_key)
 
-        feed.datastreams = self._get_data_streams(self.args.host_name)
+        feed.datastreams = self.get_current_streams(self.args.host_name)
         feed.update()
 
-    def _get_data_streams(self, host_name):
+    def update_db_with_current_streams(self):
+        """ Update database like xively or internal database.
+        """
+
+        # FIXME: want to support some internal database like sqlite.
+        self._update_xively()
+
+    def get_current_streams(self, host_name):
         """ Get status data from charge controller and convert them to data
             streams list for xively.
 
