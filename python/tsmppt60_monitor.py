@@ -28,6 +28,10 @@ class Main(object):
     _FORMAT_LOG_DATE = "%Y/%m/%d %p %l:%M:%S"
 
     def __init__(self):
+        self._init_args()
+        self._init_logger()
+
+    def _init_args(self):
         arg = argparse.ArgumentParser(
             description="main program to test TS-MPPT-60 monitor modules")
         arg.add_argument(
@@ -72,6 +76,8 @@ class Main(object):
         )
 
         self.args = arg.parse_args()
+
+    def _init_logger(self):
         self.logger = logging.getLogger("main")
 
         handler = logging.StreamHandler()
