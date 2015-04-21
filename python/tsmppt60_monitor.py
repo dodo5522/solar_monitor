@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
-""" This is main program to test another modules. """
+"""
+TS-MPPT-60 monitor application.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is application module to monitor charging status from TS-MPPT-60.
+"""
 
 import logging
 import time
