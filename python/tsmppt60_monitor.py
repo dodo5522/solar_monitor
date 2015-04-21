@@ -10,38 +10,16 @@ This is application module to monitor charging status from TS-MPPT-60.
 
 import logging
 import time
-import threading
 import argparse
 import datetime
 import xively
-import driver.livedata
+from timer import RecursiveTimer
+from driver import livedata
 
 __author__ = "Takashi Ando"
 __version__ = "0.0.2"
 __copyright__ = "Copyright 2015, My own project"
 __license__ = "GPL"
-
-
-class RecursiveTimer(object):
-    """ Class of timer for recursively running function. """
-    def __init__(self, func, intarval_sec=300, is_resursive=True):
-        self._func = func
-        self._interval = intarval_sec
-        self._is_recursive = is_resursive
-        self._thread = threading.Timer(self._interval, self._tick)
-
-    def _tick(self):
-        if self._is_recursive:
-            self._thread = threading.Timer(self._interval, self._tick)
-            self._thread.start()
-
-        self._func()
-
-    def start(self):
-        self._thread.start()
-
-    def cancel(self):
-        self._thread.cancel()
 
 
 class Main(object):
@@ -159,7 +137,7 @@ class Main(object):
         self.logger.debug(now)
 
         datastreams = []
-        live = driver.livedata.LiveData(host_name)
+        live = livedata.LiveData(host_name)
 
         for group in live:
             for status_all in live[group].get_all_status():
