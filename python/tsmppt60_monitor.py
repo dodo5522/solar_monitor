@@ -12,6 +12,7 @@ import logging
 import time
 import argparse
 import datetime
+import subprocess
 import xively
 from timer import RecursiveTimer
 from driver import livedata
@@ -27,10 +28,16 @@ class Main(object):
     _FORMAT_LOG_MSG = "%(asctime)s %(name)s %(levelname)s: %(message)s"
     _FORMAT_LOG_DATE = "%Y/%m/%d %p %l:%M:%S"
 
+    EDGE_NONE = 0
+    EDGE_RISING = 1
+    EDGE_FALLING = 2
+
     def __init__(self):
         self._init_args()
         self._init_logger()
         self._init_data_handlers()
+
+        self.__pre_battery_volt = None
 
     def _init_args(self):
         arg = argparse.ArgumentParser(
@@ -100,7 +107,12 @@ class Main(object):
     def _init_data_handlers(self):
         # FIXME: want to support some internal database like sqlite.
         self._event_handlers = (
-            self._update_xively_with,
+            (self._update_xively_with,
+             {}),
+            (self._hook_battery_charge,
+             {"cmd": "/tmp/remote_shutdown.sh",
+              "target_edge": self.EDGE_FALLING,
+              "target_volt": 12.02})
         )
 
     def _update_xively_with(self, datastreams, **kwargs):
@@ -114,6 +126,82 @@ class Main(object):
 
         feed.datastreams = datastreams
         feed.update()
+
+    def _is_battery_edge_condition(
+            self, cur_volt, prev_volt, target_volt, target_edge):
+        """ Check if the condition of target.
+
+        Keyword arguments:
+            cur_volt: current voltage of battery
+            target_volt: target (threshold) voltage of battery
+            target_edge: falling or rising target_edge
+
+        Returns: True if condition is matched
+        """
+        if prev_volt is None:
+            return False
+
+        if cur_volt < prev_volt:
+            cur_edge = self.EDGE_FALLING
+        elif cur_volt > prev_volt:
+            cur_edge = self.EDGE_RISING
+        else:
+            cur_edge = self.EDGE_NONE
+
+        self.logger.debug("cur_volt: " + str(cur_volt))
+        self.logger.debug("prev_volt: " + str(prev_volt))
+        self.logger.debug("cur_edge: " + str(cur_edge))
+        self.logger.debug("target_edge: " + str(target_edge))
+
+        condition = False
+
+        if target_edge is self.EDGE_RISING:
+            if cur_edge is self.EDGE_RISING:
+                if cur_volt > target_volt:
+                    condition = True
+        elif target_edge is self.EDGE_FALLING:
+            if cur_edge is self.EDGE_FALLING:
+                if cur_volt < target_volt:
+                    condition = True
+
+        return condition
+
+    def _hook_battery_charge(self, datastreams,
+                             cmd=None, target_volt=0, target_edge=0):
+        """ Hook battery charge and run some command according to it.
+
+        Keyword arguments:
+            datastreams: list of xively.Datastream object
+            cmd: command to run if condition is True
+            target_volt: target (threshold) voltage of battery
+            target_edge: falling or rising target_edge
+        """
+        for datastream in datastreams:
+            if datastream._data["id"] == "BatteryVoltage":
+                current_battery_volt = float(datastream._data["current_value"])
+
+                if self.__pre_battery_volt is None:
+                    self.__pre_battery_volt = current_battery_volt
+
+                break
+        else:
+            return
+
+        if self._is_battery_edge_condition(
+                current_battery_volt,
+                self.__pre_battery_volt,
+                target_volt, target_edge) is False:
+            self.__pre_battery_volt = current_battery_volt
+            return
+
+        proc = subprocess.Popen(
+            cmd.split(),
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout_data, stderr_data = proc.communicate()
+
+        self.logger.info(
+            "{} is executed and returned below values.".format(cmd))
+        self.logger.info(stdout_data)
 
     def __call__(self):
         if self.args.just_get_status:
@@ -136,8 +224,8 @@ class Main(object):
         """
         datastreams = self.get_current_streams(self.args.host_name)
 
-        for event_handler in self._event_handlers:
-            event_handler(datastreams)
+        for event_handler, kwargs in self._event_handlers:
+            event_handler(datastreams, **kwargs)
 
     def get_current_streams(self, host_name):
         """ Get status data from charge controller and convert them to data
