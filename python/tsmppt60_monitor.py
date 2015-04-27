@@ -108,9 +108,9 @@ class Main(object):
                 feed_key=self.args.feed_key),
             BatteryEventHandler(
                 self.args.log_file, self.args.debug,
-                cmd="/tmp/remote_shutdown.sh",
+                cmd="/usr/local/bin/remote_shutdown.sh",
                 target_edge=BatteryEventHandler.EDGE_FALLING,
-                target_volt=12.00),
+                target_volt=11.5),
         )
 
     def __call__(self):
