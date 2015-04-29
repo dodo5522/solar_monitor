@@ -1,42 +1,27 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
-""" This is main program to test another modules. """
+"""
+TS-MPPT-60 monitor application.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is application module to monitor charging status from TS-MPPT-60.
+"""
 
 import logging
 import time
-import threading
 import argparse
 import datetime
 import xively
-import driver.livedata
+from timer import RecursiveTimer
+from driver import livedata
+from hook_battery import BatteryEventHandler
+from hook_xively import XivelyEventHandler
 
 __author__ = "Takashi Ando"
 __version__ = "0.0.2"
 __copyright__ = "Copyright 2015, My own project"
 __license__ = "GPL"
-
-
-class RecursiveTimer(object):
-    """ Class of timer for recursively running function. """
-    def __init__(self, func, intarval_sec=300, is_resursive=True):
-        self._func = func
-        self._interval = intarval_sec
-        self._is_recursive = is_resursive
-        self._thread = threading.Timer(self._interval, self._tick)
-
-    def _tick(self):
-        if self._is_recursive:
-            self._thread = threading.Timer(self._interval, self._tick)
-            self._thread.start()
-
-        self._func()
-
-    def start(self):
-        self._thread.start()
-
-    def cancel(self):
-        self._thread.cancel()
 
 
 class Main(object):
@@ -45,6 +30,11 @@ class Main(object):
     _FORMAT_LOG_DATE = "%Y/%m/%d %p %l:%M:%S"
 
     def __init__(self):
+        self._init_args()
+        self._init_logger()
+        self._init_event_handlers()
+
+    def _init_args(self):
         arg = argparse.ArgumentParser(
             description="main program to test TS-MPPT-60 monitor modules")
         arg.add_argument(
@@ -89,6 +79,8 @@ class Main(object):
         )
 
         self.args = arg.parse_args()
+
+    def _init_logger(self):
         self.logger = logging.getLogger("main")
 
         handler = logging.StreamHandler()
@@ -107,15 +99,27 @@ class Main(object):
         else:
             self.logger.setLevel(logging.INFO)
 
+    def _init_event_handlers(self):
+        # FIXME: want to support some internal database like sqlite.
+        self._event_handlers = (
+            XivelyEventHandler(
+                self.args.log_file, self.args.debug,
+                api_key=self.args.api_key,
+                feed_key=self.args.feed_key),
+            BatteryEventHandler(
+                self.args.log_file, self.args.debug,
+                cmd="/usr/local/bin/remote_shutdown.sh",
+                target_edge=BatteryEventHandler.EDGE_FALLING,
+                target_volt=11.5),
+        )
+
     def __call__(self):
         if self.args.just_get_status:
             for data in self.get_current_streams(self.args.host_name):
                 self.logger.info("id:{0}, value:{1}".format(
                     data._data["id"], data._data["current_value"]))
         else:
-            timer = RecursiveTimer(
-                self.update_db_with_current_streams,
-                self.args.interval)
+            timer = RecursiveTimer(self.monitor, self.args.interval)
 
             try:
                 timer.start()
@@ -124,21 +128,14 @@ class Main(object):
             except KeyboardInterrupt:
                 timer.cancel()
 
-    def _update_xively(self):
-        """ Update xively feed with data got with get_current_streams().
+    def monitor(self):
+        """ Monitor charge controller and update database like xively or
+            internal database. This method should be called with a timer.
         """
-        api = xively.XivelyAPIClient(self.args.api_key)
-        feed = api.feeds.get(self.args.feed_key)
+        datastreams = self.get_current_streams(self.args.host_name)
 
-        feed.datastreams = self.get_current_streams(self.args.host_name)
-        feed.update()
-
-    def update_db_with_current_streams(self):
-        """ Update database like xively or internal database.
-        """
-
-        # FIXME: want to support some internal database like sqlite.
-        self._update_xively()
+        for event_handler in self._event_handlers:
+            event_handler.run_handler(datastreams)
 
     def get_current_streams(self, host_name):
         """ Get status data from charge controller and convert them to data
@@ -154,7 +151,7 @@ class Main(object):
         self.logger.debug(now)
 
         datastreams = []
-        live = driver.livedata.LiveData(host_name)
+        live = livedata.LiveData(host_name)
 
         for group in live:
             for status_all in live[group].get_all_status():
