@@ -15,8 +15,8 @@ import datetime
 import xively
 from timer import RecursiveTimer
 from driver import livedata
-from hook_battery import BatteryEventHandler
-from hook_xively import XivelyEventHandler
+from hook import BatteryEventHandler
+from hook import XivelyEventHandler
 
 __author__ = "Takashi Ando"
 __version__ = "0.0.2"
