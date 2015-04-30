@@ -1,0 +1,5 @@
+FEED_KEY=
+API_KEY=
+INTERVAL=300
+LOG=/var/log/tsmppt60_monitor.log
+DEBUG=YES
