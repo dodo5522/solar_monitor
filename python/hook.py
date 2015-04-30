@@ -145,6 +145,8 @@ class BatteryEventHandler(EventHandler):
             self.__pre_battery_volt = current_battery_volt
             return
 
+        self.logger.debug("running command {}".format(self._cmd))
+
         proc = subprocess.Popen(
             self._cmd.split(),
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
