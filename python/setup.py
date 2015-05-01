@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='tsmppt60_monitor',
@@ -13,5 +13,8 @@ setup(
     py_modules=[
         "tsmppt60_monitor",
         "timer",
-        "hook"]
+        "hook"],
+    install_requires=[
+        "requests>=2.6.0",
+        "xively-python>=0.1.0-rc2"]
 )
