@@ -9,17 +9,23 @@ TS-MPPT-60 timer library module.
 import time
 import datetime
 import threading
+from . import Logger
 
 
-class RecursiveTimer(object):
+class RecursiveTimer(Logger):
     """ Class of timer for recursively running function. """
-    def __init__(self, target, interval=300):
+    def __init__(self, target, interval=300, **kwargs):
         """ Recursive timer
 
         Arguments:
             target: callable object to run by timer event.
             interval: interval time as second
         """
+        Logger.__init__(
+            self,
+            log_file_path=getattr(kwargs, "log_file_path"),
+            debug=getattr(kwargs, "debug"))
+
         self._event_kill = threading.Event()
         self._thread_tick = threading.Thread(
             target=self._tick,
@@ -55,7 +61,12 @@ class RecursiveTimer(object):
 
         while not self._event_kill.isSet():
             event_tick.wait()
-            target()
+
+            try:
+                target()
+            except Exception as err:
+                self.logger.debug(str(err))
+
             event_tick.clear()
 
     def start(self):
