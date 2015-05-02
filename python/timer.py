@@ -9,7 +9,7 @@ TS-MPPT-60 timer library module.
 import time
 import datetime
 import threading
-from . import Logger
+from driver.base import Logger
 
 
 class RecursiveTimer(Logger):
@@ -23,8 +23,8 @@ class RecursiveTimer(Logger):
         """
         Logger.__init__(
             self,
-            log_file_path=getattr(kwargs, "log_file_path"),
-            debug=getattr(kwargs, "debug"))
+            log_file_path=kwargs.get("log_file_path"),
+            debug=kwargs.get("debug"))
 
         self._event_kill = threading.Event()
         self._thread_tick = threading.Thread(
