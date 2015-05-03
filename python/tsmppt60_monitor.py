@@ -19,7 +19,7 @@ from hook import BatteryEventHandler
 from hook import XivelyEventHandler
 
 __author__ = "Takashi Ando"
-__version__ = "0.0.2"
+__version__ = "1.1.1"
 __copyright__ = "Copyright 2015, My own project"
 __license__ = "GPL"
 

@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name='tsmppt60_monitor',
-    version='1.1',
+    version='1.1.1',
     description='TS-MPPT-60 charge controller monitor',
     author='Takashi Ando',
     url='https://github.com/dodo5522/tsmppt60_monitor',
