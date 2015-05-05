@@ -17,6 +17,7 @@ from timer import RecursiveTimer
 from driver import livedata
 from hook.battery import BatteryEventHandler
 from hook.xively import XivelyEventHandler
+from hook.m2x import M2XEventHandler
 
 __author__ = "Takashi Ando"
 __version__ = "1.1.1"
@@ -106,6 +107,10 @@ class Main(object):
                 self.args.log_file, self.args.debug,
                 api_key=self.args.api_key,
                 feed_key=self.args.feed_key),
+            M2XEventHandler(
+                self.args.log_file, self.args.debug,
+                api_key=self.args.api_key,
+                device_key=self.args.feed_key),
             BatteryEventHandler(
                 self.args.log_file, self.args.debug,
                 cmd="/usr/local/bin/remote_shutdown.sh",
