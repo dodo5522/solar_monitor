@@ -6,7 +6,8 @@ TS-MPPT-60 monitor application's hook library.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
-import m2x.client
+from m2x.client import M2XClient
+from m2x.utils import to_iso
 from . import EventHandler
 
 
@@ -42,7 +43,7 @@ class M2XEventHandler(EventHandler):
 
             values[ds_name] = []
             values[ds_name].append(
-                {"value": ds_value, "timestamp": ds_at.isoformat()})
+                {"value": ds_value, "timestamp": to_iso(ds_at.utcnow())})
 
             self.logger.debug(ds_name)
             self.logger.debug(ds_at)
@@ -51,6 +52,6 @@ class M2XEventHandler(EventHandler):
         all_data = {"values": values, "location": None}
         print(all_data)
 
-        res = stream.update(all_data)
+        res = self.device.update(all_data)
         self.logger.debug(
             "device update returns status {}".format(res["status"]))
