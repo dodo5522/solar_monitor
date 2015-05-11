@@ -43,7 +43,7 @@ class M2XEventHandler(EventHandler):
 
             values[ds_name] = []
             values[ds_name].append(
-                {"value": ds_value, "timestamp": to_iso(ds_at.utcnow())})
+                {"value": str(ds_value), "timestamp": to_iso(ds_at.utcnow())})
 
             self.logger.debug(ds_name)
             self.logger.debug(ds_at)
@@ -52,6 +52,6 @@ class M2XEventHandler(EventHandler):
         all_data = {"values": values, "location": None}
         print(all_data)
 
-        res = self.device.update(all_data)
+        res = self.device.post_updates(**all_data)
         self.logger.debug(
             "device update returns status {}".format(res["status"]))
