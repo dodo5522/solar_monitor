@@ -8,14 +8,14 @@ TS-MPPT-60 monitor application's hook library.
 
 from m2x.client import M2XClient
 from m2x.utils import to_iso
-from . import EventHandler
+from . import BaseEventHandler
 
 
-class M2XEventHandler(EventHandler):
+class EventHandler(BaseEventHandler):
     def __init__(
             self, log_file_path=None, debug=False,
             api_key=None, device_key=None):
-        EventHandler.__init__(self, log_file_path, debug)
+        BaseEventHandler.__init__(self, log_file_path, debug)
         self._api_key = api_key
         self._device_key = device_key
 

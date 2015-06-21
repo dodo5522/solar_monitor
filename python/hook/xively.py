@@ -7,14 +7,14 @@ TS-MPPT-60 monitor application's hook library.
 """
 
 import xively
-from . import EventHandler
+from . import BaseEventHandler
 
 
-class XivelyEventHandler(EventHandler):
+class EventHandler(BaseEventHandler):
     def __init__(
             self, log_file_path=None, debug=False,
             api_key=None, feed_key=None):
-        EventHandler.__init__(self, log_file_path, debug)
+        BaseEventHandler.__init__(self, log_file_path, debug)
         self._api_key = api_key
         self._feed_key = feed_key
 

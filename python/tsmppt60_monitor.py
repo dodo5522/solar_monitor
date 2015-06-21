@@ -13,11 +13,11 @@ import time
 import argparse
 import datetime
 import xively
+import hook.battery
+import hook.xively
+import hook.m2x
 from timer import RecursiveTimer
 from driver import livedata
-from hook.battery import BatteryEventHandler
-from hook.xively import XivelyEventHandler
-from hook.m2x import M2XEventHandler
 
 __author__ = "Takashi Ando"
 __version__ = "1.1.1"
@@ -103,18 +103,18 @@ class Main(object):
     def _init_event_handlers(self):
         # FIXME: want to support some internal database like sqlite.
         self._event_handlers = (
-            XivelyEventHandler(
+            hook.xively.EventHandler(
                 self.args.log_file, self.args.debug,
                 api_key=self.args.api_key,
                 feed_key=self.args.feed_key),
-            M2XEventHandler(
+            hook.m2x.EventHandler(
                 self.args.log_file, self.args.debug,
                 api_key=self.args.api_key,
                 device_key=self.args.feed_key),
-            BatteryEventHandler(
+            hook.battery.EventHandler(
                 self.args.log_file, self.args.debug,
                 cmd="/usr/local/bin/remote_shutdown.sh",
-                target_edge=BatteryEventHandler.EDGE_FALLING,
+                target_edge=hook.battery.EventHandler.EDGE_FALLING,
                 target_volt=11.5),
         )
 

@@ -9,7 +9,7 @@ TS-MPPT-60 monitor application's hook library.
 import logging
 
 
-class EventHandler(object):
+class BaseEventHandler(object):
     """ Event handeler abstract class. """
 
     _FORMAT_LOG_MSG = "%(asctime)s %(name)s %(levelname)s: %(message)s"

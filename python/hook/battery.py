@@ -7,10 +7,10 @@ TS-MPPT-60 monitor application's hook library.
 """
 
 import subprocess
-from . import EventHandler
+from . import BaseEventHandler
 
 
-class BatteryEventHandler(EventHandler):
+class EventHandler(BaseEventHandler):
     EDGE_NONE = 0
     EDGE_RISING = 1
     EDGE_FALLING = 2
@@ -20,7 +20,7 @@ class BatteryEventHandler(EventHandler):
             cmd="/tmp/remote_shutdown.sh",
             target_edge=EDGE_FALLING,
             target_volt=12.0):
-        EventHandler.__init__(self, log_file_path, debug)
+        BaseEventHandler.__init__(self, log_file_path, debug)
 
         self._cmd = cmd
         self._target_volt = target_volt
