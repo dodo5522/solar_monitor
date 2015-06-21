@@ -19,7 +19,7 @@ class EventHandler(BaseEventHandler):
         self._api_key = api_key
         self._device_key = device_key
 
-        client = m2x.client.M2XClient(key=api_key)
+        client = M2XClient(key=api_key)
         self.device = client.api.device(id=device_key)
 
     def run_handler(self, datastreams, **kwargs):
