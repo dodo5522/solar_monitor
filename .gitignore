@@ -1,3 +1,9 @@
+bin
+build
+dist
+include
+lib
+pip-*
 *.swp
 *.pyc
 *.egg-info
