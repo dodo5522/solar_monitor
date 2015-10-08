@@ -156,11 +156,11 @@ class Main(object):
         self.logger.debug(now)
 
         datastreams = []
-        live = livedata.LiveData(host_name)
+        stats = livedata.LiveStatus(host_name)
 
-        for group in live:
-            for status_all in live[group].get_all_status():
-                self.logger.debug(group + ": " + ", ".join(status_all))
+        for stat in stats:
+            for status_all in stat.get_all_status():
+                self.logger.debug(str(stat) + ": " + ", ".join(status_all))
 
                 datastreams.append(
                     xively.Datastream(
