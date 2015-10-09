@@ -18,14 +18,24 @@ class EventHandler(BaseEventHandler):
         self._api_key = api_key
         self._feed_key = feed_key
 
-    def run_handler(self, datastreams, **kwargs):
+    def run_handler(self, rawdatas, **kwargs):
         """ Update xively feed with datastreams.
 
         Keyword arguments:
-            datastreams: list of xively.Datastream object
+            rawdatas: tuple of raw data
         """
         api = xively.XivelyAPIClient(self._api_key)
         feed = api.feeds.get(self._feed_key)
+
+        datastreams = []
+        for rawdata in rawdatas:
+            datastreams.append(
+                xively.Datastream(
+                    id="".join(rawdata["id"].split()),
+                    current_value=float(rawdata["data"]["value"]),
+                    at=rawdata["at"]
+                )
+            )
 
         feed.datastreams = datastreams
         feed.update()

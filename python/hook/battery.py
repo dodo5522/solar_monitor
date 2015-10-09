@@ -66,15 +66,15 @@ class EventHandler(BaseEventHandler):
 
         return condition
 
-    def run_handler(self, datastreams, **kwargs):
+    def run_handler(self, rawdatas, **kwargs):
         """ Hook battery charge and run some command according to it.
 
         Keyword arguments:
-            datastreams: list of xively.Datastream object
+            rawdatas: tuple of raw data
         """
-        for datastream in datastreams:
-            if datastream._data["id"] == "BatteryVoltage":
-                current_battery_volt = float(datastream._data["current_value"])
+        for rawdata in rawdatas:
+            if rawdata["id"] == "BatteryVoltage":
+                current_battery_volt = float(rawdata["data"]["value"])
 
                 if self.__pre_battery_volt is None:
                     self.__pre_battery_volt = current_battery_volt

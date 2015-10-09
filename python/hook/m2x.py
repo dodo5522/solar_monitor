@@ -22,19 +22,18 @@ class EventHandler(BaseEventHandler):
         client = M2XClient(key=api_key)
         self.device = client.api.device(id=device_key)
 
-    def run_handler(self, datastreams, **kwargs):
+    def run_handler(self, rawdatas, **kwargs):
         names = []
         for stream in self.device.streams():
             names.append(stream.data.get("name"))
 
-        for name in names:
-            self.logger.debug(name)
-
         values = {}
-        for ds in datastreams:
-            ds_name = ds._data["id"]
-            ds_value = ds._data["current_value"]
-            ds_at = ds._data["at"]
+        for rawdata in rawdatas:
+            ds_name = "".join(rawdata["id"].split())
+            ds_value = rawdata["data"]["value"]
+            ds_at = rawdata["at"]
+
+            self.logger.debug(ds_name)
 
             try:
                 names.index(ds_name)

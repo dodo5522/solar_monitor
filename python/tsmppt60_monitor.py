@@ -12,7 +12,6 @@ import logging
 import time
 import argparse
 import datetime
-import xively
 import hook.battery
 import hook.xively
 import hook.m2x
@@ -120,9 +119,9 @@ class Main(object):
 
     def __call__(self):
         if self.args.just_get_status:
-            for data in self.get_current_streams(self.args.host_name):
-                self.logger.info("id:{0}, value:{1}".format(
-                    data._data["id"], data._data["current_value"]))
+            for rawdata in self.get_current_streams(self.args.host_name):
+                self.logger.info("id:{}, value:{}".format(
+                    rawdata["id"], rawdata["data"]["value"]))
         else:
             timer = RecursiveTimer(self.monitor, self.args.interval)
 
@@ -137,10 +136,10 @@ class Main(object):
         """ Monitor charge controller and update database like xively or
             internal database. This method should be called with a timer.
         """
-        datastreams = self.get_current_streams(self.args.host_name)
+        rawdata = self.get_current_streams(self.args.host_name)
 
         for event_handler in self._event_handlers:
-            event_handler.run_handler(datastreams)
+            event_handler.run_handler(rawdata)
 
     def get_current_streams(self, host_name):
         """ Get status data from charge controller and convert them to data
@@ -150,27 +149,38 @@ class Main(object):
             host_name: ip address like 192.168.1.20 or
                        host name can be resolved by DNS
 
-        Returns: xively.Datastream list
+        Returns:
+            datastreams tuple as below.
+            (
+                {
+                    "id": "Battery Voltage",
+                    "data": {"value": 12.1, "unit": "V"},
+                    "at": datetime.datetime(2015, 10, 1)
+                },
+                {
+                    "id": "Charge Current",
+                    "data": {"value": 10.0, "unit": "A"},
+                    "at": datetime.datetime(2015, 10, 1)
+                },
+                ...
+            )
         """
         now = datetime.datetime.utcnow()
         self.logger.debug(now)
 
-        datastreams = []
-        stats = livedata.LiveStatus(host_name)
+        rawdatas = []
+        groups = livedata.LiveStatus(host_name)
 
-        for stat in stats:
-            for status_all in stat.get_all_status():
-                self.logger.debug(str(stat) + ": " + ", ".join(status_all))
+        for group in groups:
+            for status in group.get_all_status():
+                self.logger.debug(str(group) + ": " + ", ".join(status))
 
-                datastreams.append(
-                    xively.Datastream(
-                        id="".join(status_all[0].split()),
-                        current_value=float(status_all[1]),
-                        at=now
-                    )
-                )
+                rawdatas.append({
+                    "id": status[0],
+                    "data": {"value": float(status[1]), "unit": status[2]},
+                    "at": now})
 
-        return datastreams
+        return tuple(rawdatas)
 
 
 if __name__ == "__main__":
