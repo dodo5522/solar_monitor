@@ -23,22 +23,20 @@ class EventHandler(BaseEventHandler):
         self.device = client.api.device(id=device_key)
 
     def run_handler(self, rawdatas, **kwargs):
-        names = []
-        for stream in self.device.streams():
-            names.append(stream.data.get("name"))
+        names = [stream.data.get("name") for stream in self.device.streams()]
 
         values = {}
         for rawdata in rawdatas:
             ds_name = "".join(rawdata["id"].split())
-            ds_value = rawdata["data"]["value"]
-            ds_at = rawdata["at"]
-
-            self.logger.debug(ds_name)
 
             try:
                 names.index(ds_name)
             except ValueError:
+                self.logger.debug(ds_name + " is not found in m2x.")
                 continue
+
+            ds_value = rawdata["data"]["value"]
+            ds_at = rawdata["at"]
 
             values[ds_name] = []
             values[ds_name].append(
@@ -49,8 +47,8 @@ class EventHandler(BaseEventHandler):
             self.logger.debug(ds_value)
 
         all_data = {"values": values, "location": None}
-        print(all_data)
+        self.logger.info(all_data)
 
         res = self.device.post_updates(**all_data)
-        self.logger.debug(
+        self.logger.info(
             "device update returns status {}".format(res["status"]))
