@@ -66,15 +66,15 @@ class EventHandler(BaseEventHandler):
 
         return condition
 
-    def run_handler(self, rawdatas, **kwargs):
+    def run_handler(self, rawdata, **kwargs):
         """ Hook battery charge and run some command according to it.
 
         Keyword arguments:
-            rawdatas: tuple of raw data
+            rawdata: dict of raw data
         """
-        for rawdata in rawdatas:
-            if rawdata["id"] == "BatteryVoltage":
-                current_battery_volt = float(rawdata["data"]["value"])
+        for data in rawdata["data"]:
+            if data["label"] == "Battery Voltage":
+                current_battery_volt = data["value"]
 
                 if self.__pre_battery_volt is None:
                     self.__pre_battery_volt = current_battery_volt

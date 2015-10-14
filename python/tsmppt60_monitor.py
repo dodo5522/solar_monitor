@@ -15,6 +15,7 @@ import datetime
 import hook.battery
 import hook.xively
 import hook.m2x
+import hook.keenio
 from timer import RecursiveTimer
 from driver import livedata
 
@@ -115,13 +116,15 @@ class Main(object):
                 cmd="/usr/local/bin/remote_shutdown.sh",
                 target_edge=hook.battery.EventHandler.EDGE_FALLING,
                 target_volt=11.5),
+            hook.keenio.EventHandler(
+                None,
+                None,
+                self.args.log_file, self.args.debug),
         )
 
     def __call__(self):
         if self.args.just_get_status:
-            for rawdata in self.get_current_streams(self.args.host_name):
-                self.logger.info("id:{}, value:{}".format(
-                    rawdata["id"], rawdata["data"]["value"]))
+            self.get_current_streams(self.args.host_name)
         else:
             timer = RecursiveTimer(self.monitor, self.args.interval)
 
@@ -136,51 +139,37 @@ class Main(object):
         """ Monitor charge controller and update database like xively or
             internal database. This method should be called with a timer.
         """
-        rawdata = self.get_current_streams(self.args.host_name)
+        stream = self.get_current_streams(self.args.host_name)
 
         for event_handler in self._event_handlers:
-            event_handler.run_handler(rawdata)
+            event_handler.run_handler(stream)
 
     def get_current_streams(self, host_name):
         """ Get status data from charge controller and convert them to data
-            streams list for xively.
+            streams list.
 
         Keyword arguments:
             host_name: ip address like 192.168.1.20 or
                        host name can be resolved by DNS
 
         Returns:
-            datastreams tuple as below.
-            (
-                {
-                    "id": "Battery Voltage",
-                    "data": {"value": 12.1, "unit": "V"},
-                    "at": datetime.datetime(2015, 10, 1)
-                },
-                {
-                    "id": "Charge Current",
-                    "data": {"value": 10.0, "unit": "A"},
-                    "at": datetime.datetime(2015, 10, 1)
-                },
-                ...
-            )
+            datetime and datastreams list got from get_all_status()
         """
         now = datetime.datetime.utcnow()
-        self.logger.debug(now)
-
-        rawdatas = []
         groups = livedata.LiveStatus(host_name)
+        ret_dict = {
+            "source": "solar",
+            "data": [group.get_all_status() for group in groups],
+            "at": now}
 
-        for group in groups:
-            for status in group.get_all_status():
-                self.logger.debug(str(group) + ": " + ", ".join(status))
+        for data_list in ret_dict["data"]:
+            for data in data_list:
+                self.logger.info(
+                    "{}: {}, {}, {}, {} from {}".format(
+                        ret_dict["at"], data["group"], data["label"],
+                        str(data["value"]), data["unit"], ret_dict["source"]))
 
-                rawdatas.append({
-                    "id": status[0],
-                    "data": {"value": float(status[1]), "unit": status[2]},
-                    "at": now})
-
-        return tuple(rawdatas)
+        return ret_dict
 
 
 if __name__ == "__main__":
