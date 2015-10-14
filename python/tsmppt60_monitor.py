@@ -33,7 +33,6 @@ class Main(object):
     def __init__(self):
         self._init_args()
         self._init_logger()
-        self._init_event_handlers()
 
     def _init_args(self):
         arg = argparse.ArgumentParser(
@@ -124,6 +123,7 @@ class Main(object):
                 self.logger.info("id:{0}, value:{1}".format(
                     data._data["id"], data._data["current_value"]))
         else:
+            self._init_event_handlers()
             timer = RecursiveTimer(self.monitor, self.args.interval)
 
             try:
