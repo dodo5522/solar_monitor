@@ -33,7 +33,6 @@ class Main(object):
     def __init__(self):
         self._init_args()
         self._init_logger()
-        self._init_event_handlers()
 
     def _init_args(self):
         arg = argparse.ArgumentParser(
@@ -126,6 +125,7 @@ class Main(object):
         if self.args.just_get_status:
             self.get_current_streams(self.args.host_name)
         else:
+            self._init_event_handlers()
             timer = RecursiveTimer(self.monitor, self.args.interval)
 
             try:
