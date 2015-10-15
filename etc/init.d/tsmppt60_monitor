@@ -19,7 +19,6 @@ DAEMON=/usr/bin/python3
 [ "${DEBUG}" = 'NO' ] || DEBUG_ARGS='--debug'
 DAEMON_ARGS="-m $(basename ${SCRIPTNAME}) -i ${INTERVAL} -l ${LOG} ${DEBUG_ARGS} \
     -xa ${XIVELY_API_KEY} -xf ${XIVELY_FEED_KEY} \
-    -md ${M2X_DEVICE_KEY} -ma ${M2X_API_KEY} \
     -kp ${KEENIO_PROJECT_ID} -kw ${KEENIO_WRITE_KEY}"
 
 do_start()

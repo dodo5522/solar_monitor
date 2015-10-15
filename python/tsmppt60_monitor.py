@@ -15,7 +15,6 @@ import argparse
 import datetime
 import hook.battery
 import hook.xively
-import hook.m2x
 import hook.keenio
 from timer import RecursiveTimer
 from driver import livedata
@@ -59,18 +58,6 @@ class Main(object):
             type=int,
             nargs='?', default=None, const=None,
             help="Xively feed key"
-        )
-        arg.add_argument(
-            "-ma", "--m2x-api-key",
-            type=str,
-            nargs='?', default=None, const=None,
-            help="M2X API key string"
-        )
-        arg.add_argument(
-            "-md", "--m2x-device-key",
-            type=str,
-            nargs='?', default=None, const=None,
-            help="M2X feed key"
         )
         arg.add_argument(
             "-kp", "--keenio-project-id",
