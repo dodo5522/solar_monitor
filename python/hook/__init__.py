@@ -32,10 +32,7 @@ class BaseEventHandler(object):
             handler.setFormatter(formatter)
             self.logger.addHandler(handler)
 
-        if debug:
-            self.logger.setLevel(logging.DEBUG)
-        else:
-            self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(logging.DEBUG if debug else logging.INFO)
 
     def run_handler(self, *args, **kwargs):
         raise NotImplementedError
