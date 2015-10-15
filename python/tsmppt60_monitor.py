@@ -12,10 +12,10 @@ import logging
 import time
 import argparse
 import datetime
-import xively
 import hook.battery
 import hook.xively
 import hook.m2x
+import hook.keenio
 from timer import RecursiveTimer
 from driver import livedata
 
@@ -44,14 +44,40 @@ class Main(object):
             help="TS-MPPT-60 host address"
         )
         arg.add_argument(
-            "-a", "--api-key",
+            "-xa", "--xively-api-key",
             type=str,
+            nargs='?', default=None, const=None,
             help="Xively API key string"
         )
         arg.add_argument(
-            "-f", "--feed-key",
+            "-xf", "--xively-feed-key",
             type=int,
+            nargs='?', default=None, const=None,
             help="Xively feed key"
+        )
+        arg.add_argument(
+            "-ma", "--m2x-api-key",
+            type=str,
+            nargs='?', default=None, const=None,
+            help="M2X API key string"
+        )
+        arg.add_argument(
+            "-md", "--m2x-device-key",
+            type=str,
+            nargs='?', default=None, const=None,
+            help="M2X feed key"
+        )
+        arg.add_argument(
+            "-kp", "--keenio-project-id",
+            type=str,
+            nargs='?', default=None, const=None,
+            help="keenio project id string"
+        )
+        arg.add_argument(
+            "-kw", "--keenio-write-key",
+            type=str,
+            nargs='?', default=None, const=None,
+            help="keenio write key"
         )
         arg.add_argument(
             "-i", "--interval",
@@ -103,25 +129,24 @@ class Main(object):
         # FIXME: want to support some internal database like sqlite.
         self._event_handlers = (
             hook.xively.EventHandler(
-                self.args.log_file, self.args.debug,
-                api_key=self.args.api_key,
-                feed_key=self.args.feed_key),
+                self.args.xively_api_key, self.args.xively_feed_key,
+                self.args.log_file, self.args.debug),
             hook.m2x.EventHandler(
-                self.args.log_file, self.args.debug,
-                api_key=self.args.api_key,
-                device_key=self.args.feed_key),
+                self.args.m2x_api_key, self.args.m2x_device_key,
+                self.args.log_file, self.args.debug),
             hook.battery.EventHandler(
                 self.args.log_file, self.args.debug,
                 cmd="/usr/local/bin/remote_shutdown.sh",
                 target_edge=hook.battery.EventHandler.EDGE_FALLING,
                 target_volt=11.5),
+            hook.keenio.EventHandler(
+                self.args.keenio_project_id, self.args.keenio_write_key,
+                self.args.log_file, self.args.debug),
         )
 
     def __call__(self):
         if self.args.just_get_status:
-            for data in self.get_current_streams(self.args.host_name):
-                self.logger.info("id:{0}, value:{1}".format(
-                    data._data["id"], data._data["current_value"]))
+            self.get_current_streams(self.args.host_name)
         else:
             self._init_event_handlers()
             timer = RecursiveTimer(self.monitor, self.args.interval)
@@ -137,40 +162,37 @@ class Main(object):
         """ Monitor charge controller and update database like xively or
             internal database. This method should be called with a timer.
         """
-        datastreams = self.get_current_streams(self.args.host_name)
+        stream = self.get_current_streams(self.args.host_name)
 
         for event_handler in self._event_handlers:
-            event_handler.run_handler(datastreams)
+            event_handler.run_handler(stream)
 
     def get_current_streams(self, host_name):
         """ Get status data from charge controller and convert them to data
-            streams list for xively.
+            streams list.
 
         Keyword arguments:
             host_name: ip address like 192.168.1.20 or
                        host name can be resolved by DNS
 
-        Returns: xively.Datastream list
+        Returns:
+            datetime and datastreams list got from get_all_status()
         """
         now = datetime.datetime.utcnow()
-        self.logger.debug(now)
+        groups = livedata.LiveStatus(host_name)
+        ret_dict = {
+            "source": "solar",
+            "data": [group.get_all_status() for group in groups],
+            "at": now}
 
-        datastreams = []
-        live = livedata.LiveData(host_name)
+        for data_list in ret_dict["data"]:
+            for data in data_list:
+                self.logger.info(
+                    "{}: {}, {}, {}, {} from {}".format(
+                        ret_dict["at"], data["group"], data["label"],
+                        str(data["value"]), data["unit"], ret_dict["source"]))
 
-        for group in live:
-            for status_all in live[group].get_all_status():
-                self.logger.debug(group + ": " + ", ".join(status_all))
-
-                datastreams.append(
-                    xively.Datastream(
-                        id="".join(status_all[0].split()),
-                        current_value=float(status_all[1]),
-                        at=now
-                    )
-                )
-
-        return datastreams
+        return ret_dict
 
 
 if __name__ == "__main__":
