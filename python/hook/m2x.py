@@ -48,8 +48,6 @@ class EventHandler(BaseEventHandler):
                 self.logger.debug(ds_value)
 
         all_data = {"values": values, "location": None}
-        self.logger.info(all_data)
-
         res = self.device.post_updates(**all_data)
         self.logger.info(
             "device update returns status {}".format(res["status"]))
