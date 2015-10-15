@@ -63,7 +63,7 @@ class Main(object):
         )
         arg.add_argument(
             "-md", "--m2x-device-key",
-            type=int,
+            type=str,
             nargs='?', default=None, const=None,
             help="M2X feed key"
         )
@@ -75,7 +75,7 @@ class Main(object):
         )
         arg.add_argument(
             "-kw", "--keenio-write-key",
-            type=int,
+            type=str,
             nargs='?', default=None, const=None,
             help="keenio write key"
         )
@@ -140,7 +140,7 @@ class Main(object):
                 target_edge=hook.battery.EventHandler.EDGE_FALLING,
                 target_volt=11.5),
             hook.keenio.EventHandler(
-                self.keenio_project_id, self.keenio_write_key,
+                self.args.keenio_project_id, self.args.keenio_write_key,
                 self.args.log_file, self.args.debug),
         )
 
