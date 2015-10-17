@@ -15,7 +15,6 @@ import argparse
 import datetime
 import hook.battery
 import hook.xively
-import hook.m2x
 import hook.keenio
 from timer import RecursiveTimer
 from driver import livedata
