@@ -31,8 +31,12 @@ class EventHandler(BaseEventHandler):
         rawdata = self._get_rawdata()
         self.logger.debug("send data to keenio at {}".format(rawdata["at"]))
 
+        _newdata_list = []
         for data_list in rawdata["data"]:
             for data in data_list:
                 _newdata = data.copy()
                 _newdata["source"] = rawdata["source"]
-                client.add_event("offgrid", _newdata, timestamp=rawdata["at"])
+                _newdata["keen"] = {"timestamp": rawdata["at"].isoformat() + "Z"}
+                _newdata_list.append(_newdata)
+
+        client.add_events({"offgrid": _newdata_list})
