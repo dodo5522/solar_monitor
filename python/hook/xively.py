@@ -10,7 +10,7 @@ import xively
 from . import BaseEventHandler
 
 
-class EventHandler(BaseEventHandler):
+class XivelyHandler(BaseEventHandler):
     """ Event handler class for xively. """
 
     def __init__(self, callback_to_get_rawdata, api_key, feed_key,

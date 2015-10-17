@@ -13,9 +13,9 @@ import logging
 import time
 import argparse
 import datetime
-import hook.battery
-import hook.xively
-import hook.keenio
+from hook.battery import BatteryHandler
+from hook.xively import XivelyHandler
+from hook.keenio import KeenIoHandler
 from timer import RecursiveTimer
 from driver import livedata
 
@@ -140,25 +140,25 @@ class Main(object):
 
         if self.args.xively_api_key and self.args.xively_feed_key:
             self._event_handlers.append(
-                hook.xively.EventHandler(
+                XivelyHandler(
                     self.get_rawdata,
                     self.args.xively_api_key, self.args.xively_feed_key,
                     self.args.log_file, self.args.debug))
 
         if self.args.keenio_project_id and self.args.keenio_write_key:
             self._event_handlers.append(
-                hook.keenio.EventHandler(
+                KeenIoHandler(
                     self.get_rawdata,
                     self.args.keenio_project_id, self.args.keenio_write_key,
                     self.args.log_file, self.args.debug))
 
         if self.args.battery_monitor_enabled:
             self._event_handlers.append(
-                hook.battery.EventHandler(
+                BatteryHandler(
                     self.get_rawdata,
                     self.args.log_file, self.args.debug,
                     cmd=self.args.battery_limit_hook_script,
-                    target_edge=hook.battery.EventHandler.EDGE_FALLING,
+                    target_edge=BatteryHandler.EDGE_FALLING,
                     target_volt=self.args.battery_limit))
 
         for handler in self._event_handlers:

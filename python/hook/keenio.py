@@ -10,7 +10,7 @@ from keen.client import KeenClient
 from . import BaseEventHandler
 
 
-class EventHandler(BaseEventHandler):
+class KeenIoHandler(BaseEventHandler):
     """ Event handler class for keen-io. """
 
     def __init__(self, callback_to_get_rawdata, project_id, write_key,

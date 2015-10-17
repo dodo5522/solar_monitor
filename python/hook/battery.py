@@ -10,7 +10,7 @@ import subprocess
 from . import BaseEventHandler
 
 
-class EventHandler(BaseEventHandler):
+class BatteryHandler(BaseEventHandler):
     """ Event handler class for battery monitoring. """
 
     EDGE_NONE = 0
