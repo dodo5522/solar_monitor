@@ -25,8 +25,8 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
 
         self._event_trigger_push = threading.Event()
         self._event_kill_thread = threading.Event()
-        self._thread_push = threading.Thread(
-                target=self._handler, args=(), daemon=True)
+        self._thread_push = threading.Thread(target=self._handler, args=())
+        self._thread_push.setDaemon(True)
 
     def _init_logger(self, log_file_path, debug):
         self.logger = logging.getLogger(type(self).__name__)
@@ -46,13 +46,18 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
 
     def _handler(self, *args, **kwargs):
         while True:
-            self._event_trigger_push.wait()
-            self._event_trigger_push.clear()
+            try:
+                self._event_trigger_push.wait()
+                self._event_trigger_push.clear()
 
-            if self._event_kill_thread.is_set():
-                break
+                if self._event_kill_thread.is_set():
+                    break
 
-            self._push_server()
+                self._push_server()
+            except Exception as e:
+                self.logger.debug(str(e))
+            finally:
+                pass
 
     def _get_rawdata(self):
         if self._callback_to_get_rawdata:
