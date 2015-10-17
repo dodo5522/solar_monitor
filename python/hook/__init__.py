@@ -25,8 +25,8 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
 
         self._event_trigger_push = threading.Event()
         self._event_kill_thread = threading.Event()
-        self._thread_push = threading.Thread(
-                target=self._handler, args=(), daemon=True)
+        self._thread_push = threading.Thread(target=self._handler, args=())
+        self._thread_push.setDaemon(True)
 
     def _init_logger(self, log_file_path, debug):
         self.logger = logging.getLogger(type(self).__name__)
