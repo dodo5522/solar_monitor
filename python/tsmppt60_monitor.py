@@ -187,6 +187,8 @@ class Main(object):
                 timer.start()
                 while True:
                     time.sleep(10)
+            except Exception as e:
+                self.logger.debug(str(e))
             finally:
                 timer.cancel()
                 for handler in self._event_handlers:

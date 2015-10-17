@@ -46,13 +46,18 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
 
     def _handler(self, *args, **kwargs):
         while True:
-            self._event_trigger_push.wait()
-            self._event_trigger_push.clear()
+            try:
+                self._event_trigger_push.wait()
+                self._event_trigger_push.clear()
 
-            if self._event_kill_thread.is_set():
-                break
+                if self._event_kill_thread.is_set():
+                    break
 
-            self._push_server()
+                self._push_server()
+            except Exception as e:
+                self.logger.debug(str(e))
+            finally:
+                pass
 
     def _get_rawdata(self):
         if self._callback_to_get_rawdata:
