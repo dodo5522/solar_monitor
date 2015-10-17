@@ -17,6 +17,5 @@ setup(
         "timer"],
     install_requires=[
         "requests>=2.6.0",
-        "xively-python>=0.1.0-rc2",
-        "m2x>=4.0.0"]
+        "xively-python>=0.1.0-rc1"]
 )
