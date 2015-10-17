@@ -6,17 +6,27 @@ TS-MPPT-60 monitor application's hook library.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
+import abc
+import threading
 import logging
 
 
-class BaseEventHandler(object):
+class BaseEventHandler(metaclass=abc.ABCMeta):
     """ Event handeler abstract class. """
 
     _FORMAT_LOG_MSG = "%(asctime)s %(name)s %(levelname)s: %(message)s"
     _FORMAT_LOG_DATE = "%Y/%m/%d %p %l:%M:%S"
 
-    def __init__(self, log_file_path=None, debug=False):
+    def __init__(self, callback_to_get_rawdata,
+                 log_file_path=None, debug=False):
         self._init_logger(log_file_path, debug)
+
+        self._callback_to_get_rawdata = callback_to_get_rawdata
+
+        self._event_trigger_push = threading.Event()
+        self._event_kill_thread = threading.Event()
+        self._thread_push = threading.Thread(
+                target=self._handler, args=(), daemon=True)
 
     def _init_logger(self, log_file_path, debug):
         self.logger = logging.getLogger(type(self).__name__)
@@ -34,5 +44,36 @@ class BaseEventHandler(object):
 
         self.logger.setLevel(logging.DEBUG if debug else logging.INFO)
 
-    def run_handler(self, *args, **kwargs):
+    def _handler(self, *args, **kwargs):
+        while True:
+            self._event_trigger_push.wait()
+            self._event_trigger_push.clear()
+
+            if self._event_kill_thread.is_set():
+                break
+
+            self._push_server()
+
+    def _get_rawdata(self):
+        if self._callback_to_get_rawdata:
+            return self._callback_to_get_rawdata()
+        else:
+            return None
+
+    def start(self):
+        """ Start event handler thread. """
+        self._thread_push.start()
+
+    def join(self):
+        """ Kill event handler thread. """
+        self._event_kill_thread.set()
+        self.set_trigger()
+        self._thread_push.join(timeout=5)
+
+    def set_trigger(self):
+        """ Set trigger to run handler. """
+        self._event_trigger_push.set()
+
+    @abc.abstractmethod
+    def _push_server(self):
         raise NotImplementedError

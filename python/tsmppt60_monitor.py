@@ -8,6 +8,7 @@ TS-MPPT-60 monitor application.
 This is application module to monitor charging status from TS-MPPT-60.
 """
 
+import threading
 import logging
 import time
 import argparse
@@ -33,6 +34,10 @@ class Main(object):
     def __init__(self):
         self._init_args()
         self._init_logger()
+        self._init_event_handlers()
+
+        self._lock_rawdata = threading.Lock()
+        self._rawdata = {"source": "solar", "data": None, "at": None}
 
     def _init_args(self):
         arg = argparse.ArgumentParser(
@@ -80,6 +85,25 @@ class Main(object):
             help="keenio write key"
         )
         arg.add_argument(
+            "-be", "--battery-monitor-enabled",
+            action="store_true",
+            default=False,
+            help="enable battery monitor"
+        )
+        arg.add_argument(
+            "-bl", "--battery-limit",
+            type=float,
+            nargs='?', default=11.5, const=11.5,
+            help="battery voltage limit like 11.5"
+        )
+        arg.add_argument(
+            "-bs", "--battery-limit-hook-script",
+            type=str, nargs='?',
+            default="/usr/local/bin/remote_shutdown.sh",
+            const="/usr/local/bin/remote_shutdown.sh",
+            help="path to hook sript run at limit of battery"
+        )
+        arg.add_argument(
             "-i", "--interval",
             type=int,
             default=300,
@@ -120,79 +144,87 @@ class Main(object):
             handler.setFormatter(formatter)
             self.logger.addHandler(handler)
 
-        if self.args.debug:
-            self.logger.setLevel(logging.DEBUG)
-        else:
-            self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(
+                logging.DEBUG if self.args.debug else logging.INFO)
 
     def _init_event_handlers(self):
         # FIXME: want to support some internal database like sqlite.
-        self._event_handlers = (
-            hook.xively.EventHandler(
-                self.args.xively_api_key, self.args.xively_feed_key,
-                self.args.log_file, self.args.debug),
-            hook.m2x.EventHandler(
-                self.args.m2x_api_key, self.args.m2x_device_key,
-                self.args.log_file, self.args.debug),
-            hook.battery.EventHandler(
-                self.args.log_file, self.args.debug,
-                cmd="/usr/local/bin/remote_shutdown.sh",
-                target_edge=hook.battery.EventHandler.EDGE_FALLING,
-                target_volt=11.5),
-            hook.keenio.EventHandler(
-                self.args.keenio_project_id, self.args.keenio_write_key,
-                self.args.log_file, self.args.debug),
-        )
+        self._event_handlers = []
+
+        if self.args.xively_api_key and self.args.xively_feed_key:
+            self._event_handlers.append(
+                hook.xively.EventHandler(
+                    self.get_rawdata,
+                    self.args.xively_api_key, self.args.xively_feed_key,
+                    self.args.log_file, self.args.debug))
+
+        if self.args.keenio_project_id and self.args.keenio_write_key:
+            self._event_handlers.append(
+                hook.keenio.EventHandler(
+                    self.get_rawdata,
+                    self.args.keenio_project_id, self.args.keenio_write_key,
+                    self.args.log_file, self.args.debug))
+
+        if self.args.battery_monitor_enabled:
+            self._event_handlers.append(
+                hook.battery.EventHandler(
+                    self.get_rawdata,
+                    self.args.log_file, self.args.debug,
+                    cmd=self.args.battery_limit_hook_script,
+                    target_edge=hook.battery.EventHandler.EDGE_FALLING,
+                    target_volt=self.args.battery_limit))
+
+        for handler in self._event_handlers:
+            handler.start()
 
     def __call__(self):
         if self.args.just_get_status:
-            self.get_current_streams(self.args.host_name)
+            self._timer_handler()
         else:
-            self._init_event_handlers()
-            timer = RecursiveTimer(self.monitor, self.args.interval)
+            timer = RecursiveTimer(self._timer_handler, self.args.interval)
 
             try:
                 timer.start()
                 while True:
                     time.sleep(10)
-            except KeyboardInterrupt:
+            finally:
                 timer.cancel()
+                for handler in self._event_handlers:
+                    handler.join()
 
-    def monitor(self):
+    def set_rawdata(self, data, at):
+        """ Set rawdata into internal buffer with locked. """
+        with self._lock_rawdata:
+            self._rawdata["data"] = data
+            self._rawdata["at"] = at
+
+    def get_rawdata(self):
+        """ Get rawdata with locked. """
+        with self._lock_rawdata:
+            ret = self._rawdata.copy()
+
+        return ret
+
+    def _timer_handler(self):
         """ Monitor charge controller and update database like xively or
             internal database. This method should be called with a timer.
         """
-        stream = self.get_current_streams(self.args.host_name)
+        groups = livedata.LiveStatus(self.args.host_name)
 
-        for event_handler in self._event_handlers:
-            event_handler.run_handler(stream)
+        self.set_rawdata(
+            [group.get_all_status() for group in groups],
+            datetime.datetime.utcnow())
 
-    def get_current_streams(self, host_name):
-        """ Get status data from charge controller and convert them to data
-            streams list.
-
-        Keyword arguments:
-            host_name: ip address like 192.168.1.20 or
-                       host name can be resolved by DNS
-
-        Returns:
-            datetime and datastreams list got from get_all_status()
-        """
-        now = datetime.datetime.utcnow()
-        groups = livedata.LiveStatus(host_name)
-        ret_dict = {
-            "source": "solar",
-            "data": [group.get_all_status() for group in groups],
-            "at": now}
-
-        for data_list in ret_dict["data"]:
+        rawdata = self.get_rawdata()
+        for data_list in rawdata["data"]:
             for data in data_list:
                 self.logger.info(
                     "{}: {}, {}, {}, {} from {}".format(
-                        ret_dict["at"], data["group"], data["label"],
-                        str(data["value"]), data["unit"], ret_dict["source"]))
+                        rawdata["at"], data["group"], data["label"],
+                        str(data["value"]), data["unit"], rawdata["source"]))
 
-        return ret_dict
+        for handler in self._event_handlers:
+            handler.set_trigger()
 
 
 if __name__ == "__main__":
