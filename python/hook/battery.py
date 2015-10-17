@@ -81,6 +81,9 @@ class EventHandler(BaseEventHandler):
         rawdata = self._get_rawdata()
         current_battery_volt = self._get_battery_voltage(rawdata)
 
+        self.logger.debug(
+                "got data for battery monitor at {}".format(rawdata["at"]))
+
         if self.__pre_battery_volt is None:
             self.__pre_battery_volt = current_battery_volt
 

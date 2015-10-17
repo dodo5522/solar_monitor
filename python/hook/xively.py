@@ -29,6 +29,8 @@ class EventHandler(BaseEventHandler):
 
         rawdata = self._get_rawdata()
 
+        self.logger.debug("send data to xively at {}".format(rawdata["at"]))
+
         datastreams = []
         for data_list in rawdata["data"]:
             for data in data_list:

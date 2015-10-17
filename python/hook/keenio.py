@@ -29,6 +29,7 @@ class EventHandler(BaseEventHandler):
             write_key=self._write_key)
 
         rawdata = self._get_rawdata()
+        self.logger.debug("send data to keenio at {}".format(rawdata["at"]))
 
         for data_list in rawdata["data"]:
             for data in data_list:
