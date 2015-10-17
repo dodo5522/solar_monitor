@@ -120,10 +120,8 @@ class Main(object):
             handler.setFormatter(formatter)
             self.logger.addHandler(handler)
 
-        if self.args.debug:
-            self.logger.setLevel(logging.DEBUG)
-        else:
-            self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(
+                logging.DEBUG if self.args.debug else logging.INFO)
 
     def _init_event_handlers(self):
         # FIXME: want to support some internal database like sqlite.
