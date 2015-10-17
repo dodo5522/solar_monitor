@@ -85,15 +85,22 @@ class Main(object):
             help="keenio write key"
         )
         arg.add_argument(
+            "-be", "--battery-monitor-enabled",
+            action="store_true",
+            default=False,
+            help="enable battery monitor"
+        )
+        arg.add_argument(
             "-bl", "--battery-limit",
             type=float,
-            default=11.5,
+            nargs='?', default=11.5, const=11.5,
             help="battery voltage limit like 11.5"
         )
         arg.add_argument(
             "-bs", "--battery-limit-hook-script",
-            type=str,
+            type=str, nargs='?',
             default="/usr/local/bin/remote_shutdown.sh",
+            const="/usr/local/bin/remote_shutdown.sh",
             help="path to hook sript run at limit of battery"
         )
         arg.add_argument(
@@ -156,7 +163,7 @@ class Main(object):
                     self.args.keenio_project_id, self.args.keenio_write_key,
                     self.args.log_file, self.args.debug))
 
-        if len(self._event_handlers):
+        if self.args.battery_monitor_enabled:
             self._event_handlers.append(
                 hook.battery.EventHandler(
                     self.args.log_file, self.args.debug,
