@@ -154,22 +154,28 @@ class Main(object):
         if self.args.xively_api_key and self.args.xively_feed_key:
             self._event_handlers.append(
                 hook.xively.EventHandler(
+                    self.get_rawdata,
                     self.args.xively_api_key, self.args.xively_feed_key,
                     self.args.log_file, self.args.debug))
 
         if self.args.keenio_project_id and self.args.keenio_write_key:
             self._event_handlers.append(
                 hook.keenio.EventHandler(
+                    self.get_rawdata,
                     self.args.keenio_project_id, self.args.keenio_write_key,
                     self.args.log_file, self.args.debug))
 
         if self.args.battery_monitor_enabled:
             self._event_handlers.append(
                 hook.battery.EventHandler(
+                    self.get_rawdata,
                     self.args.log_file, self.args.debug,
                     cmd=self.args.battery_limit_hook_script,
                     target_edge=hook.battery.EventHandler.EDGE_FALLING,
                     target_volt=self.args.battery_limit))
+
+        for handler in self._event_handlers:
+            handler.start()
 
     def __call__(self):
         if self.args.just_get_status:
@@ -181,8 +187,10 @@ class Main(object):
                 timer.start()
                 while True:
                     time.sleep(10)
-            except KeyboardInterrupt:
+            finally:
                 timer.cancel()
+                for handler in self._event_handlers:
+                    handler.join()
 
     def set_rawdata(self, data, at):
         """ Set rawdata into internal buffer with locked. """
@@ -215,8 +223,8 @@ class Main(object):
                         rawdata["at"], data["group"], data["label"],
                         str(data["value"]), data["unit"], rawdata["source"]))
 
-        for event_handler in self._event_handlers:
-            event_handler.run_handler(rawdata)
+        for handler in self._event_handlers:
+            handler.set_trigger()
 
 
 if __name__ == "__main__":

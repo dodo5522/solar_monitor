@@ -11,16 +11,17 @@ from . import BaseEventHandler
 
 
 class EventHandler(BaseEventHandler):
+    """ Event handler class for battery monitoring. """
+
     EDGE_NONE = 0
     EDGE_RISING = 1
     EDGE_FALLING = 2
 
-    def __init__(
-            self, log_file_path=None, debug=False,
-            cmd=None,
-            target_edge=EDGE_FALLING,
-            target_volt=12.0):
-        BaseEventHandler.__init__(self, log_file_path, debug)
+    def __init__(self, callback_to_get_rawdata,
+                 log_file_path=None, debug=False, cmd=None,
+                 target_edge=EDGE_FALLING, target_volt=12.0):
+        BaseEventHandler.__init__(
+                self, callback_to_get_rawdata, log_file_path, debug)
 
         self._cmd = cmd
         self._target_volt = target_volt
@@ -74,12 +75,10 @@ class EventHandler(BaseEventHandler):
 
         return 0.0
 
-    def run_handler(self, rawdata, **kwargs):
-        """ Hook battery charge and run some command according to it.
+    def _push_server(self):
+        """ Hook battery charge and run some command according to it. """
 
-        Keyword arguments:
-            rawdata: dict of raw data
-        """
+        rawdata = self._get_rawdata()
         current_battery_volt = self._get_battery_voltage(rawdata)
 
         if self.__pre_battery_volt is None:

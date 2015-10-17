@@ -11,21 +11,24 @@ from . import BaseEventHandler
 
 
 class EventHandler(BaseEventHandler):
-    def __init__(
-            self, project_id, write_key, log_file_path=None, debug=False):
-        BaseEventHandler.__init__(self, log_file_path, debug)
+    """ Event handler class for keen-io. """
+
+    def __init__(self, callback_to_get_rawdata, project_id, write_key,
+                 log_file_path=None, debug=False):
+        BaseEventHandler.__init__(
+                self, callback_to_get_rawdata, log_file_path, debug)
+
         self._project_id = project_id
         self._write_key = write_key
 
-    def run_handler(self, rawdata, **kwargs):
-        """ Update keen-io with datastreams.
+    def _push_server(self):
+        """ Update keen-io with datastreams. """
 
-        Keyword arguments:
-            rawdata: dict with got time and data streams
-        """
         client = KeenClient(
             project_id=self._project_id,
             write_key=self._write_key)
+
+        rawdata = self._get_rawdata()
 
         for data_list in rawdata["data"]:
             for data in data_list:
