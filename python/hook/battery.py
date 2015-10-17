@@ -17,7 +17,7 @@ class EventHandler(BaseEventHandler):
 
     def __init__(
             self, log_file_path=None, debug=False,
-            cmd="/tmp/remote_shutdown.sh",
+            cmd=None,
             target_edge=EDGE_FALLING,
             target_volt=12.0):
         BaseEventHandler.__init__(self, log_file_path, debug)
@@ -91,6 +91,9 @@ class EventHandler(BaseEventHandler):
                 self._target_volt,
                 self._target_edge) is False:
             self.__pre_battery_volt = current_battery_volt
+            return
+
+        if self._cmd is None:
             return
 
         self.logger.debug("running command {}".format(self._cmd))

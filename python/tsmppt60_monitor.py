@@ -35,7 +35,9 @@ class Main(object):
         self._init_args()
         self._init_logger()
         self._init_event_handlers()
-        self._init_rawdata()
+
+        self._lock_rawdata = threading.Lock()
+        self._rawdata = {"source": "solar", "data": None, "at": None}
 
     def _init_args(self):
         arg = argparse.ArgumentParser(
@@ -81,6 +83,18 @@ class Main(object):
             type=str,
             nargs='?', default=None, const=None,
             help="keenio write key"
+        )
+        arg.add_argument(
+            "-bl", "--battery-limit",
+            type=float,
+            default=11.5,
+            help="battery voltage limit like 11.5"
+        )
+        arg.add_argument(
+            "-bs", "--battery-limit-hook-script",
+            type=str,
+            default="/usr/local/bin/remote_shutdown.sh",
+            help="path to hook sript run at limit of battery"
         )
         arg.add_argument(
             "-i", "--interval",
@@ -146,17 +160,9 @@ class Main(object):
             self._event_handlers.append(
                 hook.battery.EventHandler(
                     self.args.log_file, self.args.debug,
-                    cmd="/usr/local/bin/remote_shutdown.sh",
+                    cmd=self.args.battery_limit_hook_script,
                     target_edge=hook.battery.EventHandler.EDGE_FALLING,
-                    target_volt=11.5))
-
-    def _init_rawdata(self):
-        """ Initialize internal buffer to store raw data got from TS-MPPT. """
-        if not getattr(self, "_lock_rawdata"):
-            self._lock_rawdata = threading.Lock()
-
-        with self._lock_rawdata:
-            self._rawdata = {"source": "solar", "data": None, "at": None}
+                    target_volt=self.args.battery_limit))
 
     def __call__(self):
         if self.args.just_get_status:
