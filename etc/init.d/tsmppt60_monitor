@@ -17,9 +17,12 @@ DAEMON=/usr/bin/python3
 . ${CONFIG_FILE}
 
 [ "${DEBUG}" = 'NO' ] || DEBUG_ARGS='--debug'
+[ "${BATTERY_MONITOR_ENABLED}" = 'NO' ] || ENABLE_BATTERY_MONITOR='-be'
+
 DAEMON_ARGS="-m $(basename ${SCRIPTNAME}) -i ${INTERVAL} -l ${LOG} ${DEBUG_ARGS} \
     -xa ${XIVELY_API_KEY} -xf ${XIVELY_FEED_KEY} \
-    -kp ${KEENIO_PROJECT_ID} -kw ${KEENIO_WRITE_KEY}"
+    -kp ${KEENIO_PROJECT_ID} -kw ${KEENIO_WRITE_KEY} \
+    -bl ${BATTERY_LIMIT_VOLTAGE} -bs ${BATTERY_LIMIT_HOOK_SCRIPT} ${ENABLE_BATTERY_MONITOR}"
 
 do_start()
 {
