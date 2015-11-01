@@ -75,7 +75,7 @@ class BatteryHandler(BaseEventHandler):
 
         return 0.0
 
-    def _push_server(self):
+    def exec(self):
         """ Hook battery charge and run some command according to it. """
 
         rawdata = self._get_rawdata()

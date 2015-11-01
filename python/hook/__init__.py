@@ -53,7 +53,7 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
                 if self._event_kill_thread.is_set():
                     break
 
-                self._push_server()
+                self.exec()
             except Exception as e:
                 self.logger.debug(str(e))
             finally:
@@ -72,13 +72,13 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
     def join(self):
         """ Kill event handler thread. """
         self._event_kill_thread.set()
-        self.set_trigger()
+        self.set_event()
         self._thread_push.join(timeout=5)
 
-    def set_trigger(self):
-        """ Set trigger to run handler. """
+    def set_event(self):
+        """ Set event to run handler. """
         self._event_trigger_push.set()
 
     @abc.abstractmethod
-    def _push_server(self):
+    def exec(self):
         raise NotImplementedError

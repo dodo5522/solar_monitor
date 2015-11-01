@@ -21,7 +21,7 @@ class KeenIoHandler(BaseEventHandler):
         self._project_id = project_id
         self._write_key = write_key
 
-    def _push_server(self):
+    def exec(self):
         """ Update keen-io with datastreams. """
 
         client = KeenClient(

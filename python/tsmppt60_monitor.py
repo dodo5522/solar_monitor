@@ -213,7 +213,7 @@ class Main(object):
                         str(data["value"]), data["unit"], rawdata["source"]))
 
         for handler in self._event_handlers:
-            handler.set_trigger()
+            handler.set_event()
 
 
 if __name__ == "__main__":

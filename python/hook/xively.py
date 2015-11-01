@@ -21,7 +21,7 @@ class XivelyHandler(BaseEventHandler):
         self._api_key = api_key
         self._feed_key = feed_key
 
-    def _push_server(self):
+    def exec(self):
         """ Update xively feed with datastreams. """
 
         api = xively.XivelyAPIClient(self._api_key)
