@@ -8,3 +8,4 @@ pip-*
 *.pyc
 *.egg-info
 .Python
+.python-version
