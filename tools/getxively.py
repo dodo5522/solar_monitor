@@ -117,7 +117,8 @@ if __name__ == "__main__":
             if "errors" not in data:
                 break
 
-            print("{}: {}, {}".format(time_out, data["title"], data["errors"]))
+            print("{}: {}: {}, {}".format(
+                time_out, stream, data["title"], data["errors"]))
 
             # must wait for 10 seconds min on xively to get next stream data.
             time.sleep(10)
@@ -126,5 +127,6 @@ if __name__ == "__main__":
         else:
             continue
 
-        with open('xively_' + stream + '.json', "w") as fp:
+        file_name = "xively_" + "".join(stream.split(" ")) + "_" + "-".join(args.start_date.split(":")) + '.json'
+        with open(file_name, "w") as fp:
             fp.write(json.dumps(data))
