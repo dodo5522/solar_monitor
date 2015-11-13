@@ -17,7 +17,7 @@ from hook.battery import BatteryHandler
 from hook.xively import XivelyHandler
 from hook.keenio import KeenIoHandler
 from timer import RecursiveTimer
-from driver import livedata
+from tsmppt60_driver import live
 
 __author__ = "Takashi Ando"
 __version__ = "1.1.1"

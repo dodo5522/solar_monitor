@@ -10,7 +10,6 @@ setup(
     author='Takashi Ando',
     url='https://github.com/dodo5522/tsmppt60_monitor',
     packages=[
-        "driver",
         "hook"],
     py_modules=[
         "tsmppt60_monitor",
@@ -18,5 +17,6 @@ setup(
     install_requires=[
         "requests>=2.6.0",
         "xively-python>=0.1.0-rc1",
-        "keen"]
+        "keen",
+        "tsmppt60-driver>=0.0.6"]
 )

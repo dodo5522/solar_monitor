@@ -9,7 +9,7 @@ TS-MPPT-60 timer library module.
 import time
 import datetime
 import threading
-from driver.base import Logger
+from tsmppt60_driver import Logger
 
 
 class RecursiveTimer(Logger):
