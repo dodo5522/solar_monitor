@@ -68,10 +68,9 @@ class BatteryHandler(BaseEventHandler):
         return condition
 
     def _get_battery_voltage(self, rawdata):
-        for data_list in rawdata["data"]:
-            for data in data_list:
-                if data["label"] == "Battery Voltage":
-                    return data["value"]
+        for data in rawdata["data"]:
+            if data["label"] == "Battery Voltage":
+                return data["value"]
 
         return 0.0
 

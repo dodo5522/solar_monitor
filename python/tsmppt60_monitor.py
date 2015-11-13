@@ -182,7 +182,33 @@ class Main(object):
                     handler.join()
 
     def set_rawdata(self, data, at):
-        """ Set rawdata into internal buffer with locked. """
+        """ Set rawdata into internal buffer with locked.
+            The raw data format is like below.
+            {
+                "source": "solar",
+                "data":
+                [
+                    {
+                        "group": "Battery",
+                        "label": "Battery Voltage",
+                        "value": 12.1,
+                        "unit": "V"
+                    },
+                    {
+                        "group": "Battery",
+                        "label": "Charge Current",
+                        "value": 8.4,
+                        "unit": "A"
+                    }
+                    {
+                        "group": "Array",
+                        "label": "Array Current",
+                        "value": 5.0,
+                        "unit": "A"
+                    },
+                ],
+                "at": datetime.datetime(2015, 10, 1, 0, 0, 0)}
+        """
         with self._lock_rawdata:
             self._rawdata["data"] = data
             self._rawdata["at"] = at
@@ -198,19 +224,20 @@ class Main(object):
         """ Monitor charge controller and update database like xively or
             internal database. This method should be called with a timer.
         """
-        groups = livedata.LiveStatus(self.args.host_name)
+        now = datetime.datetime.utcnow()
+        groups = live.SystemStatus(self.args.host_name)
 
-        self.set_rawdata(
-            [group.get_all_status() for group in groups],
-            datetime.datetime.utcnow())
+        got_data = []
+        for group in groups:
+            got_data.extend(group.get_status_all())
 
-        rawdata = self.get_rawdata()
-        for data_list in rawdata["data"]:
-            for data in data_list:
-                self.logger.info(
-                    "{}: {}, {}, {}, {} from {}".format(
-                        rawdata["at"], data["group"], data["label"],
-                        str(data["value"]), data["unit"], rawdata["source"]))
+        self.set_rawdata(got_data, now)
+
+        for data in got_data:
+            self.logger.info(
+                "{}: {}, {}, {}, {}".format(
+                    now, data["group"], data["label"],
+                    str(data["value"]), data["unit"]))
 
         for handler in self._event_handlers:
             handler.set_event()
