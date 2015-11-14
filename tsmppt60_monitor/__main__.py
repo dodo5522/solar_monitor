@@ -133,20 +133,6 @@ class Main(object):
         # FIXME: want to support some internal database like sqlite.
         self._event_handlers = []
 
-        if self.args.xively_api_key and self.args.xively_feed_key:
-            self._event_handlers.append(
-                XivelyHandler(
-                    self.get_rawdata,
-                    self.args.xively_api_key, self.args.xively_feed_key,
-                    self.args.log_file, self.args.debug))
-
-        if self.args.keenio_project_id and self.args.keenio_write_key:
-            self._event_handlers.append(
-                KeenIoHandler(
-                    self.get_rawdata,
-                    self.args.keenio_project_id, self.args.keenio_write_key,
-                    self.args.log_file, self.args.debug))
-
         if self.args.battery_monitor_enabled:
             self._event_handlers.append(
                 BatteryHandler(
@@ -155,6 +141,20 @@ class Main(object):
                     cmd=self.args.battery_limit_hook_script,
                     target_edge=BatteryHandler.EDGE_FALLING,
                     target_volt=self.args.battery_limit))
+
+        if self.args.keenio_project_id and self.args.keenio_write_key:
+            self._event_handlers.append(
+                KeenIoHandler(
+                    self.get_rawdata,
+                    self.args.keenio_project_id, self.args.keenio_write_key,
+                    self.args.log_file, self.args.debug))
+
+        if self.args.xively_api_key and self.args.xively_feed_key:
+            self._event_handlers.append(
+                XivelyHandler(
+                    self.get_rawdata,
+                    self.args.xively_api_key, self.args.xively_feed_key,
+                    self.args.log_file, self.args.debug))
 
         for handler in self._event_handlers:
             handler.start()
