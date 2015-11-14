@@ -13,16 +13,11 @@ import logging
 import time
 import argparse
 import datetime
-from hook.battery import BatteryHandler
-from hook.xively import XivelyHandler
-from hook.keenio import KeenIoHandler
-from timer import RecursiveTimer
-from tsmppt60_driver import live
-
-__author__ = "Takashi Ando"
-__version__ = "1.1.1"
-__copyright__ = "Copyright 2015, My own project"
-__license__ = "GPL"
+import tsmppt60_driver as driver
+from .hook.battery import BatteryHandler
+from .hook.xively import XivelyHandler
+from .hook.keenio import KeenIoHandler
+from .timer import RecursiveTimer
 
 
 class Main(object):
@@ -225,7 +220,7 @@ class Main(object):
             internal database. This method should be called with a timer.
         """
         now = datetime.datetime.utcnow()
-        groups = live.SystemStatus(self.args.host_name)
+        groups = driver.SystemStatus(self.args.host_name)
 
         got_data = []
         for group in groups:
@@ -243,6 +238,5 @@ class Main(object):
             handler.set_event()
 
 
-if __name__ == "__main__":
-    main = Main()
-    main()
+main = Main()
+main()
