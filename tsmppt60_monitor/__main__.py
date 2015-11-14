@@ -182,26 +182,24 @@ class Main(object):
             {
                 "source": "solar",
                 "data":
-                [
                     {
-                        "group": "Battery",
-                        "label": "Battery Voltage",
-                        "value": 12.1,
-                        "unit": "V"
+                        "Battery Voltage":{
+                            "group": "Battery",
+                            "value": 12.1,
+                            "unit": "V"}
                     },
                     {
-                        "group": "Battery",
-                        "label": "Charge Current",
-                        "value": 8.4,
-                        "unit": "A"
+                        "Charge Current":{
+                            "group": "Battery",
+                            "value": 8.4,
+                            "unit": "A"
                     }
                     {
-                        "group": "Array",
-                        "label": "Array Current",
-                        "value": 5.0,
-                        "unit": "A"
+                        "Array Current":{
+                            "group": "Array",
+                            "value": 5.0,
+                            "unit": "A"}
                     },
-                ],
                 "at": datetime.datetime(2015, 10, 1, 0, 0, 0)}
         """
         with self._lock_rawdata:
@@ -219,20 +217,17 @@ class Main(object):
         """ Monitor charge controller and update database like xively or
             internal database. This method should be called with a timer.
         """
+        system_status = driver.SystemStatus(self.args.host_name)
+
         now = datetime.datetime.utcnow()
-        groups = driver.SystemStatus(self.args.host_name)
-
-        got_data = []
-        for group in groups:
-            got_data.extend(group.get_status_all())
-
+        got_data = system_status.get()
         self.set_rawdata(got_data, now)
 
-        for data in got_data:
+        for key, data in got_data.items():
             self.logger.info(
-                "{}: {}, {}, {}, {}".format(
-                    now, data["group"], data["label"],
-                    str(data["value"]), data["unit"]))
+                "{date}: {group}, {elem}, {value}[{unit}]".format(
+                    date=now, group=data["group"], elem=key,
+                    value=str(data["value"]), unit=data["unit"]))
 
         for handler in self._event_handlers:
             handler.set_event()

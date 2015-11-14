@@ -32,10 +32,10 @@ class XivelyHandler(BaseEventHandler):
         self.logger.debug("send data to xively at {}".format(rawdata["at"]))
 
         datastreams = []
-        for data in rawdata["data"]:
+        for key, data in rawdata["data"].items():
             datastreams.append(
                 xively.Datastream(
-                    id="".join(data["label"].split()),
+                    id="".join(key.split()),
                     current_value=data["value"],
                     at=rawdata["at"]
                 )

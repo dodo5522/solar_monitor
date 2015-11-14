@@ -32,8 +32,9 @@ class KeenIoHandler(BaseEventHandler):
         self.logger.debug("send data to keenio at {}".format(rawdata["at"]))
 
         _newdata_list = []
-        for data in rawdata["data"]:
-            _newdata = data.copy()
+        for key, data in rawdata["data"].items():
+            _newdata = data
+            _newdata["label"] = key
             _newdata["source"] = rawdata["source"]
             _newdata["keen"] = {"timestamp": rawdata["at"].isoformat() + "Z"}
             _newdata_list.append(_newdata)

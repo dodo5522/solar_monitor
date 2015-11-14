@@ -67,18 +67,15 @@ class BatteryHandler(BaseEventHandler):
 
         return condition
 
-    def _get_battery_voltage(self, rawdata):
-        for data in rawdata["data"]:
-            if data["label"] == "Battery Voltage":
-                return data["value"]
-
-        return 0.0
-
     def exec(self):
         """ Hook battery charge and run some command according to it. """
 
         rawdata = self._get_rawdata()
-        current_battery_volt = self._get_battery_voltage(rawdata)
+
+        if "Battery Voltage" in rawdata["data"]:
+            current_battery_volt = rawdata["data"]["Battery Voltage"]["value"]
+        else:
+            current_battery_volt = 0.0
 
         self.logger.debug(
                 "got data for battery monitor at {}".format(rawdata["at"]))
