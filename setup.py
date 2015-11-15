@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name='tsmppt60_monitor',
-    version='1.3.0',
+    version='1.4.0',
     description='TS-MPPT-60 charge controller monitor',
     author='Takashi Ando',
     url='https://github.com/dodo5522/tsmppt60_monitor',
@@ -16,5 +16,5 @@ setup(
         "requests>=2.6.0",
         "xively-python>=0.1.0-rc1",
         "keen",
-        "tsmppt60-driver>=0.0.6"]
+        "tsmppt60-driver>=0.0.7"]
 )
