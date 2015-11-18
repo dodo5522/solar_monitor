@@ -104,6 +104,12 @@ class Main(object):
             help="Just get status of charge controller"
         )
         arg.add_argument(
+            "--get-all-status",
+            action='store_false',
+            default=True,
+            help="Get all status of charge controller"
+        )
+        arg.add_argument(
             "--debug",
             action='store_true',
             default=False,
@@ -217,7 +223,7 @@ class Main(object):
         """ Monitor charge controller and update database like xively or
             internal database. This method should be called with a timer.
         """
-        system_status = driver.SystemStatus(self.args.host_name)
+        system_status = driver.SystemStatus(self.args.host_name, self.args.get_all_status)
 
         now = datetime.datetime.utcnow()
         got_data = system_status.get()
