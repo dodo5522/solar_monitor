@@ -223,10 +223,10 @@ class Main(object):
         """ Monitor charge controller and update database like xively or
             internal database. This method should be called with a timer.
         """
-        system_status = driver.SystemStatus(self.args.host_name, self.args.get_all_status)
+        system_status = driver.SystemStatus(self.args.host_name)
 
         now = datetime.datetime.utcnow()
-        got_data = system_status.get()
+        got_data = system_status.get(self.args.get_all_status)
         self.set_rawdata(got_data, now)
 
         for key, data in got_data.items():
