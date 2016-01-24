@@ -28,7 +28,7 @@ setup(
     long_description=readme(),
     license="GPLv2",
     author='Takashi Ando',
-    url='https://github.com/dodo5522/tsmppt60_monitor',
+    url='https://github.com/dodo5522/solar_monitor.git',
     install_requires=requires(),
     packages=find_packages(),
     test_suite='nose.collector'

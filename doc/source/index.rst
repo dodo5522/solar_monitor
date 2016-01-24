@@ -1,9 +1,9 @@
-.. TS MPPT Monitor documentation master file, created by
+.. Solar Monitor documentation master file, created by
    sphinx-quickstart on Fri Mar 27 07:41:23 2015.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to TS MPPT Monitor's documentation!
+Welcome to Solar Monitor's documentation!
 ===========================================
 
 Contents:

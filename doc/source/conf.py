@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# TS MPPT Monitor documentation build configuration file, created by
+# Solar Monitor documentation build configuration file, created by
 # sphinx-quickstart on Fri Mar 27 07:41:23 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -53,7 +53,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'TS MPPT Monitor'
+project = 'Solar Monitor'
 copyright = '2015, Takashi Ando'
 author = 'Takashi Ando'
 
@@ -207,7 +207,7 @@ html_static_path = ['_static']
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'TSMPPTMonitordoc'
+htmlhelp_basename = 'SolarMonitorDoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -229,7 +229,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'TSMPPTMonitor.tex', 'TS MPPT Monitor Documentation',
+  (master_doc, 'SolarMonitor.tex', 'Solar Monitor Documentation',
    'Takashi Ando', 'manual'),
 ]
 
@@ -259,7 +259,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'tsmpptmonitor', 'TS MPPT Monitor Documentation',
+    (master_doc, 'solarmonitor', 'Solar Monitor Documentation',
      [author], 1)
 ]
 
@@ -273,8 +273,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'TSMPPTMonitor', 'TS MPPT Monitor Documentation',
-   author, 'TSMPPTMonitor', 'One line description of project.',
+  (master_doc, 'SolarMonitor', 'Solar Monitor Documentation',
+   author, 'SolarMonitor', 'One line description of project.',
    'Miscellaneous'),
 ]
 
