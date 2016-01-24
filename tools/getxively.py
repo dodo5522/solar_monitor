@@ -15,7 +15,7 @@ DEFAULT_INTERVAL_TYPE = 'discrete'
 DEFAULT_DURATION_SEC = 3600
 DEFAULT_START_DATE = "2015-10-01T00:00:00Z"
 DEFAULT_FEED = '274175384'
-URL = "https://api.xively.com/v2/feeds/{}/datastreams"
+URL = "https://api.xively.com/v2/feeds/{FEED}/datastreams/{STREAM}.json?"
 
 STREAMS = ('AmpHours',
            'ArrayCurrent',
@@ -84,12 +84,11 @@ def get_start_end(start_date_str, duration):
 
 
 def get_stream_data(user, password, feed, stream, interval, start, end):
-    url = '/'.join((URL.format(feed), stream + '.json?'))
-    url = '&'.join((url,
-                    'interval=' + str(interval),
-                    'interval_type=' + DEFAULT_INTERVAL_TYPE,
-                    'start=' + start.isoformat() + 'Z',
-                    'end=' + end.isoformat() + 'Z'))
+    url = URL.format(FEED=feed, STREAM=stream)
+    url += '&'.join(('interval=' + str(interval),
+                     'interval_type=' + DEFAULT_INTERVAL_TYPE,
+                     'start=' + start.isoformat() + 'Z',
+                     'end=' + end.isoformat() + 'Z'))
     return requests.get(url, auth=(user, password)).json()
 
 

@@ -10,55 +10,60 @@ import json
 import datetime
 import time
 
-DEFAULT_INTERVAL_SEC = 600
-DEFAULT_INTERVAL_TYPE = 'discrete'
 DEFAULT_DURATION_SEC = 3600
 DEFAULT_START_DATE = "2015-10-01T00:00:00Z"
-DEFAULT_FEED = '274175384'
-URL = "https://api.xively.com/v2/feeds/{}/datastreams"
+DEFAULT_FEED = '2383efe74fdd4651a867609fe8c9479c'
+URL = "http://api-m2x.att.com/v2/devices/{FEED}/streams/{STREAM}/values?"
 
-STREAMS = ('AmpHours',
-           'ArrayCurrent',
-           'ArrayVoltage',
-           'BatteryVoltage',
-           'ChargeCurrent',
-           'HeatSinkTemperature',
-           'KilowattHours',
-           'TargetVoltage')
-#           'BatteryTemperature',
-#           'OutputPower',
-#           'SweepPmax',
-#           'SweepVoc',
+STREAMS = {
+        'ChargeCurrent': {
+            'unit': {"symbol": "A", "label": "Amperes"},
+            'tag': 'Battery'},
+        'TargetVoltage': {
+            'unit': {"symbol": "V", "label": "Volts"},
+            'tag': 'Battery'},
+        'HeatSinkTemperature': {
+            'unit': {"symbol": "C", "label": "Celcius"},
+            'tag': 'Temperature'},
+#        'AmpHours': {
+#            'unit': {"symbol": "Ah", "label": "AmpereHours"},
+#            'tag': 'Counters'},
+#        'ArrayCurrent': {
+#            'unit': {"symbol": "A", "label": "Amperes"},
+#            'tag': 'Array'},
+#        'ArrayVoltage': {
+#            'unit': {"symbol": "V", "label": "Volts"},
+#            'tag': 'Array'},
+#        'BatteryVoltage': {
+#            'unit': {"symbol": "V", "label": "Volts"},
+#            'tag': 'Battery'},
+#        'KilowattHours': {
+#            'unit': {"symbol": "kWh", "label": "KilloWattHours"},
+#            'tag': 'Counters'},
+        }
 
 
 def init_args(args=sys.argv[1:]):
     parser = argparse.ArgumentParser(
-            description="script to get data from xively")
+            description="script to get data from m2x")
 
     parser.add_argument(
             "-u", "--user",
             type=str,
             default=None,
-            help="User acount name of xively account.")
+            help="User acount name of m2x account.")
 
     parser.add_argument(
             "-p", "--password",
             type=str,
             default=None,
-            help="User password of xively account.")
+            help="User password of m2x account.")
 
     parser.add_argument(
             "-f", "--feed",
             type=str,
             default=DEFAULT_FEED,
-            help="Feed ID for xively.")
-
-    parser.add_argument(
-            "-i", "--interval",
-            type=int,
-            default=DEFAULT_INTERVAL_SEC,
-            help="Interval sec of stream data getting from xively. " +
-                 "Default is " + str(DEFAULT_INTERVAL_SEC) + ".")
+            help="Feed ID for m2x.")
 
     parser.add_argument(
             "-d", "--duration",
@@ -71,7 +76,7 @@ def init_args(args=sys.argv[1:]):
             "-s", "--start-date",
             type=str,
             default=DEFAULT_START_DATE,
-            help="Start date as UTC getting from xively. " +
+            help="Start date as UTC getting from m2x. " +
                  "Default is " + DEFAULT_START_DATE)
 
     return parser.parse_args(args)
@@ -79,40 +84,33 @@ def init_args(args=sys.argv[1:]):
 
 def get_start_end(start_date_str, duration):
     start = datetime.datetime.strptime(start_date_str, '%Y-%m-%dT%H:%M:%SZ')
+    start += datetime.timedelta(0, 0, 0, 0, 0, -9)
     end = start + datetime.timedelta(0, duration)
     return (start, end)
 
 
-def get_stream_data(user, password, feed, stream, interval, start, end):
-    url = '/'.join((URL.format(feed), stream + '.json?'))
-    url = '&'.join((url,
-                    'interval=' + str(interval),
-                    'interval_type=' + DEFAULT_INTERVAL_TYPE,
-                    'start=' + start.isoformat() + 'Z',
-                    'end=' + end.isoformat() + 'Z'))
+def get_stream_data(user, password, feed, stream, start, end):
+    url = URL.format(FEED=feed, STREAM=stream)
+    url += '&'.join(('start=' + start.isoformat() + 'Z',
+                     'end=' + end.isoformat() + 'Z',
+                     'limit=1000'))
     return requests.get(url, auth=(user, password)).json()
 
 
 if __name__ == "__main__":
     args = init_args()
 
-    interval = args.interval
-    duration = args.duration
-
-    if duration / interval > 1000:
-        raise ValueError("Xively has a limit of maximum data number 1000.")
-
-    start, end = get_start_end(args.start_date, duration)
+    start, end = get_start_end(args.start_date, args.duration)
     user = args.user
     password = args.password
     feed = args.feed
 
-    for stream in STREAMS:
+    for stream, options in STREAMS.items():
         time_out = 10
 
         while time_out:
             data = get_stream_data(
-                    user, password, feed, stream, interval, start, end)
+                    user, password, feed, stream, start, end)
 
             if "errors" not in data:
                 break
@@ -120,13 +118,26 @@ if __name__ == "__main__":
             print("{}: {}: {}, {}".format(
                 time_out, stream, data["title"], data["errors"]))
 
-            # must wait for 10 seconds min on xively to get next stream data.
+            # must wait for 10 seconds min on m2x to get next stream data.
             time.sleep(10)
 
             time_out -= 1
         else:
             continue
 
-        file_name = "xively_" + "".join(stream.split(" ")) + "_" + "-".join(args.start_date.split(":")) + '.json'
+        new_data = {}
+        datapoints = []
+
+        for dat in data["values"]:
+            new_now = datetime.datetime.strptime(dat["timestamp"].split(".")[0] + 'Z', '%Y-%m-%dT%H:%M:%SZ')
+            new_now += datetime.timedelta(0, 0, 0, 0, 0, 9)
+            datapoints.append({"at": new_now.isoformat() + "Z", "value": dat["value"]})
+
+        new_data["datapoints"] = datapoints
+        new_data["unit"] = options["unit"]
+        new_data["tags"] = [options["tag"], ]
+        new_data["id"] = stream
+
+        file_name = "m2x_" + "".join(stream.split(" ")) + "_" + "-".join(args.start_date.split(":")) + '.json'
         with open(file_name, "w") as fp:
-            fp.write(json.dumps(data))
+            fp.write(json.dumps(new_data))
