@@ -1,20 +1,35 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from setuptools import setup
+import os
+from setuptools import setup, find_packages
+
+
+def readme():
+    try:
+        os.system('pandoc -f markdown -t rst README.md -o README.rst')
+        with open('README.rst', 'r') as f:
+            return f.read()
+    except:
+        return ''
+
+
+def requires():
+    try:
+        return [pkg.strip() for pkg in open("requirements.txt").readlines()]
+    except:
+        return []
+
 
 setup(
-    name='tsmppt60_monitor',
-    version='1.4.0',
-    description='TS-MPPT-60 charge controller monitor',
+    name='solar_monitor',
+    version='1.4.1',
+    description='Solar charge controller monitor like TS-MPPT-60',
+    long_description=readme(),
+    license="GPLv2",
     author='Takashi Ando',
     url='https://github.com/dodo5522/tsmppt60_monitor',
-    packages=[
-        "tsmppt60_monitor",
-        "tsmppt60_monitor.hook"],
-    install_requires=[
-        "requests>=2.6.0",
-        "xively-python>=0.1.0-rc1",
-        "keen",
-        "tsmppt60-driver>=0.0.7"]
+    install_requires=requires(),
+    packages=find_packages(),
+    test_suite='nose.collector'
 )
