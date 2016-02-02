@@ -31,5 +31,10 @@ setup(
     url='https://github.com/dodo5522/solar_monitor.git',
     install_requires=requires(),
     packages=find_packages(),
+    entry_points={
+        'console_scripts': [
+            'solar_monitor = solar_monitor.__main__:main'
+        ]
+    },
     test_suite='nose.collector'
 )
