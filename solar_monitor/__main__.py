@@ -8,20 +8,20 @@ TS-MPPT-60 monitor application.
 This is application module to monitor charging status from TS-MPPT-60.
 """
 
-import threading
 import logging
 import time
 import argparse
 import datetime
 import tsmppt60_driver as driver
-from .hook.battery import BatteryHandler
-from .hook.xively import XivelyHandler
-from .hook.keenio import KeenIoHandler
-from .timer import RecursiveTimer
+from solar_monitor.hook.battery import BatteryHandler
+from solar_monitor.hook.xively import XivelyHandler
+from solar_monitor.hook.keenio import KeenIoHandler
+from solar_monitor.timer import RecursiveTimer
 
 
 class Main(object):
-    """ main routine class """
+    """main routine class definition.
+    """
     _FORMAT_LOG_MSG = "%(asctime)s %(name)s %(levelname)s: %(message)s"
     _FORMAT_LOG_DATE = "%Y/%m/%d %p %l:%M:%S"
 
@@ -29,9 +29,6 @@ class Main(object):
         self._init_args()
         self._init_logger()
         self._init_event_handlers()
-
-        self._lock_rawdata = threading.Lock()
-        self._rawdata = {"source": "solar", "data": None, "at": None}
 
     def _init_args(self):
         arg = argparse.ArgumentParser(
@@ -133,7 +130,7 @@ class Main(object):
             self.logger.addHandler(handler)
 
         self.logger.setLevel(
-                logging.DEBUG if self.args.debug else logging.INFO)
+            logging.DEBUG if self.args.debug else logging.INFO)
 
     def _init_event_handlers(self):
         # FIXME: want to support some internal database like sqlite.
@@ -142,7 +139,6 @@ class Main(object):
         if self.args.battery_monitor_enabled:
             self._event_handlers.append(
                 BatteryHandler(
-                    self.get_rawdata,
                     self.args.log_file, self.args.debug,
                     cmd=self.args.battery_limit_hook_script,
                     target_edge=BatteryHandler.EDGE_FALLING,
@@ -151,14 +147,12 @@ class Main(object):
         if self.args.keenio_project_id and self.args.keenio_write_key:
             self._event_handlers.append(
                 KeenIoHandler(
-                    self.get_rawdata,
                     self.args.keenio_project_id, self.args.keenio_write_key,
                     self.args.log_file, self.args.debug))
 
         if self.args.xively_api_key and self.args.xively_feed_key:
             self._event_handlers.append(
                 XivelyHandler(
-                    self.get_rawdata,
                     self.args.xively_api_key, self.args.xively_feed_key,
                     self.args.log_file, self.args.debug))
 
@@ -182,52 +176,28 @@ class Main(object):
                 for handler in self._event_handlers:
                     handler.join()
 
-    def set_rawdata(self, data, at):
-        """ Set rawdata into internal buffer with locked.
-            The raw data format is like below.
-            {
-                "source": "solar",
-                "data":
-                    {
-                        "Battery Voltage":{
-                            "group": "Battery",
-                            "value": 12.1,
-                            "unit": "V"}
-                    },
-                    {
-                        "Charge Current":{
-                            "group": "Battery",
-                            "value": 8.4,
-                            "unit": "A"
-                    }
-                    {
-                        "Array Current":{
-                            "group": "Array",
-                            "value": 5.0,
-                            "unit": "A"}
-                    },
-                "at": datetime.datetime(2015, 10, 1, 0, 0, 0)}
-        """
-        with self._lock_rawdata:
-            self._rawdata["data"] = data
-            self._rawdata["at"] = at
-
-    def get_rawdata(self):
-        """ Get rawdata with locked. """
-        with self._lock_rawdata:
-            ret = self._rawdata.copy()
-
-        return ret
-
     def _timer_handler(self):
         """ Monitor charge controller and update database like xively or
             internal database. This method should be called with a timer.
+
+        Args:
+            None
+
+        Returns:
+            None
+
+        Exceptions:
+            queue.Full: If queue of event handler is full
         """
         system_status = driver.SystemStatus(self.args.host_name)
 
         now = datetime.datetime.utcnow()
         got_data = system_status.get(self.args.get_all_status)
-        self.set_rawdata(got_data, now)
+
+        rawdata = {}
+        rawdata["source"] = "solar"
+        rawdata["data"] = got_data
+        rawdata["at"] = now
 
         for key, data in got_data.items():
             self.logger.info(
@@ -236,8 +206,12 @@ class Main(object):
                     value=str(data["value"]), unit=data["unit"]))
 
         for handler in self._event_handlers:
-            handler.set_event()
+            handler.put_q(rawdata)
+
+        for handler in self._event_handlers:
+            handler.join_q()
 
 
-main = Main()
-main()
+def main():
+    """Just call main function."""
+    Main()()

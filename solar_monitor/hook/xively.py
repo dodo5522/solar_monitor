@@ -13,22 +13,23 @@ from . import BaseEventHandler
 class XivelyHandler(BaseEventHandler):
     """ Event handler class for xively. """
 
-    def __init__(self, callback_to_get_rawdata, api_key, feed_key,
-                 log_file_path=None, debug=False):
-        BaseEventHandler.__init__(
-                self, callback_to_get_rawdata, log_file_path, debug)
+    def __init__(self, api_key, feed_key, log_file_path=None, debug=False):
+        """Initialize instance object.
 
-        self._api_key = api_key
-        self._feed_key = feed_key
+        Args:
+        Returns:
+        """
+        BaseEventHandler.__init__(self, log_file_path, debug)
 
-    def exec(self):
-        """ Update xively feed with datastreams. """
+        api = xively.XivelyAPIClient(api_key)
+        self.feed = api.feeds.get(feed_key)
 
-        api = xively.XivelyAPIClient(self._api_key)
-        feed = api.feeds.get(self._feed_key)
+    def exec(self, rawdata):
+        """Update xively feed with datastreams.
 
-        rawdata = self._get_rawdata()
-
+        Args:
+        Returns:
+        """
         self.logger.debug("send data to xively at {}".format(rawdata["at"]))
 
         datastreams = []
@@ -41,5 +42,5 @@ class XivelyHandler(BaseEventHandler):
                 )
             )
 
-        feed.datastreams = datastreams
-        feed.update()
+        self.feed.datastreams = datastreams
+        self.feed.update()

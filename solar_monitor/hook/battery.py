@@ -11,17 +11,19 @@ from . import BaseEventHandler
 
 
 class BatteryHandler(BaseEventHandler):
-    """ Event handler class for battery monitoring. """
-
+    """Event handler class for battery monitoring."""
     EDGE_NONE = 0
     EDGE_RISING = 1
     EDGE_FALLING = 2
 
-    def __init__(self, callback_to_get_rawdata,
-                 log_file_path=None, debug=False, cmd=None,
+    def __init__(self, log_file_path=None, debug=False, cmd=None,
                  target_edge=EDGE_FALLING, target_volt=12.0):
-        BaseEventHandler.__init__(
-                self, callback_to_get_rawdata, log_file_path, debug)
+        """Initialize instance object.
+
+        Args:
+        Returns:
+        """
+        BaseEventHandler.__init__(self, log_file_path, debug)
 
         self._cmd = cmd
         self._target_volt = target_volt
@@ -67,18 +69,21 @@ class BatteryHandler(BaseEventHandler):
 
         return condition
 
-    def exec(self):
-        """ Hook battery charge and run some command according to it. """
+    def exec(self, rawdata):
+        """Hook battery charge and run some command according to it.
 
-        rawdata = self._get_rawdata()
-
+        Args:
+            rawdata: dict of rawdata.
+        Returns:
+            None
+        """
         if "Battery Voltage" in rawdata["data"]:
             current_battery_volt = rawdata["data"]["Battery Voltage"]["value"]
         else:
             current_battery_volt = 0.0
 
         self.logger.debug(
-                "got data for battery monitor at {}".format(rawdata["at"]))
+            "got data for battery monitor at {}".format(rawdata["at"]))
 
         if self.__pre_battery_volt is None:
             self.__pre_battery_volt = current_battery_volt

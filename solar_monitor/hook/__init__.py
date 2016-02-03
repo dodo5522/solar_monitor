@@ -7,26 +7,28 @@ TS-MPPT-60 monitor application's hook library.
 """
 
 import abc
+import queue
 import threading
 import logging
 
 
 class BaseEventHandler(metaclass=abc.ABCMeta):
-    """ Event handeler abstract class. """
+    """Event handeler abstract class."""
 
     _FORMAT_LOG_MSG = "%(asctime)s %(name)s %(levelname)s: %(message)s"
     _FORMAT_LOG_DATE = "%Y/%m/%d %p %l:%M:%S"
 
-    def __init__(self, callback_to_get_rawdata,
-                 log_file_path=None, debug=False):
+    def __init__(self, log_file_path=None, debug=False, q_max=5):
+        """Initialize event handelr.
+
+        Args:
+        Returns:
+        Exceptions:
+        """
         self._init_logger(log_file_path, debug)
-
-        self._callback_to_get_rawdata = callback_to_get_rawdata
-
-        self._event_trigger_push = threading.Event()
-        self._event_kill_thread = threading.Event()
-        self._thread_push = threading.Thread(target=self._handler, args=())
-        self._thread_push.setDaemon(True)
+        self._thread = threading.Thread(target=self._handler, args=())
+        self._thread .setDaemon(True)
+        self._q = queue.Queue(q_max)
 
     def _init_logger(self, log_file_path, debug):
         self.logger = logging.getLogger(type(self).__name__)
@@ -47,38 +49,52 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
     def _handler(self, *args, **kwargs):
         while True:
             try:
-                self._event_trigger_push.wait()
-                self._event_trigger_push.clear()
+                rawdata = self._q.get()
 
-                if self._event_kill_thread.is_set():
+                if rawdata is None:
                     break
 
-                self.exec()
+                self.exec(rawdata)
+                self._q.task_done()
+
             except Exception as e:
                 self.logger.debug(str(e))
             finally:
                 pass
 
-    def _get_rawdata(self):
-        if self._callback_to_get_rawdata:
-            return self._callback_to_get_rawdata()
-        else:
-            return None
-
     def start(self):
         """ Start event handler thread. """
-        self._thread_push.start()
+        self._thread.start()
 
     def join(self):
         """ Kill event handler thread. """
-        self._event_kill_thread.set()
-        self.set_event()
-        self._thread_push.join(timeout=5)
+        self._q.put(None, timeout=5)
+        self._thread.join(timeout=5)
 
-    def set_event(self):
-        """ Set event to run handler. """
-        self._event_trigger_push.set()
+    def put_q(self, item):
+        """Put data to the internal queue.
+
+        Args:
+            item: data putting to the internal queue
+            block: block if True and timeout is not None
+            timeout: timeout as second
+        Returns:
+            None
+        Raises:
+            queue.Full: if timeout is set and queue is full in the time
+        """
+        self._q.put_nowait(item)
+
+    def join_q(self):
+        """Wait for joining the internal queue.
+
+        Args:
+            None
+        Returns:
+            None
+        """
+        self._q.join()
 
     @abc.abstractmethod
-    def exec(self):
+    def exec(self, rawdata):
         raise NotImplementedError

@@ -11,24 +11,26 @@ from . import BaseEventHandler
 
 
 class KeenIoHandler(BaseEventHandler):
-    """ Event handler class for keen-io. """
+    """Event handler class for keen-io."""
 
-    def __init__(self, callback_to_get_rawdata, project_id, write_key,
-                 log_file_path=None, debug=False):
-        BaseEventHandler.__init__(
-                self, callback_to_get_rawdata, log_file_path, debug)
+    def __init__(self, project_id, write_key, log_file_path=None, debug=False):
+        """Initialize instance object.
 
-        self._project_id = project_id
-        self._write_key = write_key
+        Args:
+        Returns:
+        """
+        BaseEventHandler.__init__(self, log_file_path, debug)
 
-    def exec(self):
-        """ Update keen-io with datastreams. """
+        self.client = KeenClient(
+            project_id=project_id,
+            write_key=write_key)
 
-        client = KeenClient(
-            project_id=self._project_id,
-            write_key=self._write_key)
+    def exec(self, rawdata):
+        """Update keen-io with datastreams.
 
-        rawdata = self._get_rawdata()
+        Args:
+        Returns:
+        """
         self.logger.debug("send data to keenio at {}".format(rawdata["at"]))
 
         _newdata_list = []
@@ -39,4 +41,4 @@ class KeenIoHandler(BaseEventHandler):
             _newdata["keen"] = {"timestamp": rawdata["at"].isoformat() + "Z"}
             _newdata_list.append(_newdata)
 
-        client.add_events({"offgrid": _newdata_list})
+        self.client.add_events({"offgrid": _newdata_list})
