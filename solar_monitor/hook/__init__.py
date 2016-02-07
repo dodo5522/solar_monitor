@@ -58,7 +58,9 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
                 self._q.task_done()
 
             except Exception as e:
-                self.logger.debug(str(e))
+                self.logger.debug(str(e) + ' error!!!')
+                raise
+
             finally:
                 pass
 

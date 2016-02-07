@@ -65,7 +65,8 @@ class RecursiveTimer(Logger):
             try:
                 target()
             except Exception as err:
-                self.logger.debug(str(err))
+                self.logger.debug(str(e) + ' error!!!')
+                raise
 
             event_tick.clear()
 
