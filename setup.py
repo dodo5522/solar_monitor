@@ -36,5 +36,19 @@ setup(
             'solar_monitor = solar_monitor.__main__:main'
         ]
     },
-    test_suite='nose.collector'
+    test_suite='nose.collector',
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
+        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
+        'Natural Language :: Japanese',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Topic :: System :: Monitoring',
+    ]
 )
