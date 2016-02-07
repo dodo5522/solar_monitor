@@ -7,16 +7,17 @@ from setuptools import setup, find_packages
 
 def readme():
     try:
-        os.system('pandoc -f markdown -t rst README.md -o README.rst')
-        with open('README.rst', 'r') as f:
-            return f.read()
+        _r = os.path.join(os.path.dirname(__file__), 'README.rst')
+        with open(_r, 'r') as _f:
+            return _f.read()
     except:
         return ''
 
 
 def requires():
     try:
-        return [pkg.strip() for pkg in open("requirements.txt").readlines()]
+        with open('requirements.txt', 'r') as _f:
+            return _f.readlines()
     except:
         return []
 
