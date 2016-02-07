@@ -8,7 +8,7 @@
 # Short-Description: mathkernel
 ### END INIT INFO
 
-NAME=solarmonitor
+NAME=solar_monitor
 SCRIPTNAME=$0
 CONFIG_FILE=/etc/default/$(basename ${SCRIPTNAME})
 PID_FILE=/var/run/$(basename ${SCRIPTNAME}).pid
