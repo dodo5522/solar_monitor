@@ -139,7 +139,8 @@ class Main(object):
         if self.args.battery_monitor_enabled:
             self._event_handlers.append(
                 BatteryHandler(
-                    self.args.log_file, self.args.debug,
+                    log_file_path=self.args.log_file,
+                    debug=self.args.debug,
                     cmd=self.args.battery_limit_hook_script,
                     target_edge=BatteryHandler.EDGE_FALLING,
                     target_volt=self.args.battery_limit))
@@ -147,14 +148,18 @@ class Main(object):
         if self.args.keenio_project_id and self.args.keenio_write_key:
             self._event_handlers.append(
                 KeenIoHandler(
-                    self.args.keenio_project_id, self.args.keenio_write_key,
-                    self.args.log_file, self.args.debug))
+                    project_id=self.args.keenio_project_id,
+                    write_key=self.args.keenio_write_key,
+                    log_file_path=self.args.log_file,
+                    debug=self.args.debug))
 
         if self.args.xively_api_key and self.args.xively_feed_key:
             self._event_handlers.append(
                 XivelyHandler(
-                    self.args.xively_api_key, self.args.xively_feed_key,
-                    self.args.log_file, self.args.debug))
+                    api_key=self.args.xively_api_key,
+                    feed_key=self.args.xively_feed_key,
+                    log_file_path=self.args.log_file,
+                    debug=self.args.debug))
 
         for handler in self._event_handlers:
             handler.start()
