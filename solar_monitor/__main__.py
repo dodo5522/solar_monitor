@@ -168,7 +168,7 @@ class Main(object):
         if self.args.just_get_status:
             self._timer_handler()
         else:
-            timer = RecursiveTimer(self._timer_handler, self.args.interval)
+            timer = RecursiveTimer(self._timer_handler, None, self.args.interval)
 
             try:
                 timer.start()
@@ -181,12 +181,12 @@ class Main(object):
                 for handler in self._event_handlers:
                     handler.join()
 
-    def _timer_handler(self):
+    def _timer_handler(self, arg=None):
         """ Monitor charge controller and update database like xively or
             internal database. This method should be called with a timer.
 
         Args:
-            None
+            arg: argument object
 
         Returns:
             None
