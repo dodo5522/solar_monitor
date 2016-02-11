@@ -21,14 +21,14 @@ class TestTimer(unittest.TestCase):
 
     def setUp(self):
         self.counter = 0
-        self.max_loop = 0
 
     def tearDown(self):
         pass
 
     def dummy_main(self, **kwargs):
+        max_loop = kwargs.get('max_loop')
         print("counter:" + str(self.counter))
-        if self.counter >= self.max_loop:
+        if self.counter >= max_loop:
             self.event.set()
         else:
             self.counter += 1
@@ -42,18 +42,18 @@ class TestTimer(unittest.TestCase):
 
     def test_short_loop(self):
         self.event.clear()
-        self.max_loop = 10
         interval_sec = 1
+        max_loop = 10
 
-        rtimer = timer.RecursiveTimer(interval_sec, self.dummy_main)
+        rtimer = timer.RecursiveTimer(interval_sec, self.dummy_main, max_loop=10)
         rtimer.start()
 
         self.assertTrue(rtimer.is_alive())
 
-        res = self.event.wait(self.max_loop * interval_sec + 2)
+        res = self.event.wait(max_loop * interval_sec + 2)
 
         self.assertTrue(res)
-        self.assertEqual(self.counter, self.max_loop)
+        self.assertEqual(self.counter, max_loop)
 
         rtimer.cancel()
 
