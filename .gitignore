@@ -9,4 +9,3 @@ pip-*
 *.egg-info
 .Python
 .python-version
-README.rst
