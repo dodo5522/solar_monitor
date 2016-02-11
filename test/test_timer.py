@@ -5,6 +5,8 @@
 
 import unittest
 import threading
+from pympler import muppy
+from pympler import summary
 from solar_monitor import timer
 
 
@@ -40,25 +42,29 @@ class TestTimer(unittest.TestCase):
         self.assertRaises(timer.AlreadyRunningError, rtimer.start)
         rtimer.cancel()
 
-    def test_short_loop(self):
+    def fixture_loop(self, max_loop=10):
         self.event.clear()
         interval_sec = 1
-        max_loop = 10
 
-        rtimer = timer.RecursiveTimer(interval_sec, self.dummy_main, max_loop=10)
+        _sum = summary.summarize(muppy.get_objects())
+
+        rtimer = timer.RecursiveTimer(interval_sec, self.dummy_main, max_loop=max_loop)
         rtimer.start()
-
-        self.assertTrue(rtimer.is_alive())
-
         res = self.event.wait(max_loop * interval_sec + 2)
+        rtimer.cancel()
+
+        _diff = summary.get_diff(_sum, summary.summarize(muppy.get_objects()))
+        summary.print_(_diff)
 
         self.assertTrue(res)
         self.assertEqual(self.counter, max_loop)
-
-        rtimer.cancel()
-
         self.assertFalse(rtimer.is_alive())
 
+    def test_short_loop(self):
+        self.fixture_loop(10)
+
+    def test_long_loop(self):
+        self.fixture_loop(30)
 
 if __name__ == "__main__":
     unittest.main()
