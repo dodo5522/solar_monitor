@@ -1,3 +1,8 @@
+# Status
+
+[![Build Status](https://travis-ci.org/dodo5522/solar_monitor.svg?branch=master)](https://travis-ci.org/dodo5522/solar_monitor)
+[![Coverage Status](https://coveralls.io/repos/github/dodo5522/solar_monitor/badge.svg?branch=master)](https://coveralls.io/github/dodo5522/solar_monitor?branch=master)
+
 # What is this?
 
 This is an application to monitor solar charger's status ex. TS-MPPT-60.  
