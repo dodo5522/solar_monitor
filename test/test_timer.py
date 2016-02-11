@@ -26,26 +26,26 @@ class TestTimer(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def dummy_main(self, arg):
+    def dummy_main(self, **kwargs):
+        print("counter:" + str(self.counter))
         if self.counter >= self.max_loop:
             self.event.set()
         else:
             self.counter += 1
-            print("counter:" + str(self.counter))
 
     def test_start_twice(self):
-        rtimer = timer.RecursiveTimer(lambda x: x, None, 2)
+        rtimer = timer.RecursiveTimer(2, lambda x: x)
 
         rtimer.start()
         self.assertRaises(timer.AlreadyRunningError, rtimer.start)
         rtimer.cancel()
 
-    def test_loop(self):
+    def test_short_loop(self):
         self.event.clear()
-        self.max_loop = 30
+        self.max_loop = 10
         interval_sec = 1
 
-        rtimer = timer.RecursiveTimer(self.dummy_main, None, interval_sec)
+        rtimer = timer.RecursiveTimer(interval_sec, self.dummy_main)
         rtimer.start()
 
         self.assertTrue(rtimer.is_alive())
