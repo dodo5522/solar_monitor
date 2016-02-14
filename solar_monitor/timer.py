@@ -1,28 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
-"""
-TS-MPPT-60 timer library module.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-"""
+"""TS-MPPT-60 timer library module."""
 
-import time
-import datetime
 import threading
+import time
+
+from datetime import datetime
 from tsmppt60_driver.base import Logger
 
 
 class AlreadyRunningError(Exception):
+    """Exception if timer is already running."""
     pass
 
 
 class RecursiveTimer(Logger):
-    """Class of timer for recursively running function.
-    """
+    """Class of timer for recursively running function."""
 
-    def __init__(
-            self, interval, target_func, log_file_path=None, debug=False,
-            **target_kwargs):
+    def __init__(self, interval, target_func, log_file_path=None, debug=False, **target_kwargs):
         """Recursive timer
 
         Keyword arguments:
@@ -61,16 +57,23 @@ class RecursiveTimer(Logger):
             args=(event_tick,), kwargs={})
 
         thread_mainloop.start()
+        start_time = datetime.now()
 
-        start_time = datetime.datetime.now()
-
-        while not self.event_stop_timer.isSet():
+        while True:
             time.sleep(0.5)
-            now_time = datetime.datetime.now()
+
+            if self.event_stop_timer.isSet():
+                break
+
+            if 'now_time' in locals():
+                del now_time
+            now_time = datetime.now()
 
             if (now_time - start_time).seconds >= self.interval:
-                event_tick.set()
+                if 'start_time' in locals():
+                    del start_time
                 start_time = now_time
+                event_tick.set()
 
         event_tick.set()
         thread_mainloop.join()
@@ -84,15 +87,17 @@ class RecursiveTimer(Logger):
         Returns:
             None
         """
-        while not self.event_stop_timer.isSet():
+        while True:
             event_tick.wait()
+            event_tick.clear()
+
+            if self.event_stop_timer.isSet():
+                break
 
             try:
                 self.target_func(**self.target_kwargs)
             except Exception as e:
                 self.logger.debug(str(e) + ' error!!!')
-
-            event_tick.clear()
 
     def start(self):
         """Start the timer thread.
@@ -131,3 +136,7 @@ class RecursiveTimer(Logger):
             True if alive
         """
         return self.thread_timer.isAlive()
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod(extraglobs={'rt': RecursiveTimer()})

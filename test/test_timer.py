@@ -5,6 +5,8 @@
 
 import unittest
 import threading
+
+from datetime import datetime
 from pympler import muppy
 from pympler import summary
 from solar_monitor import timer
@@ -28,12 +30,11 @@ class TestTimer(unittest.TestCase):
         pass
 
     def dummy_main(self, **kwargs):
-        max_loop = kwargs.get('max_loop')
+        self.counter += 1
         print("counter:" + str(self.counter))
-        if self.counter >= max_loop:
+
+        if self.counter >= kwargs.get('max_loop'):
             self.event.set()
-        else:
-            self.counter += 1
 
     def test_start_twice(self):
         rtimer = timer.RecursiveTimer(2, lambda x: x)
@@ -42,29 +43,38 @@ class TestTimer(unittest.TestCase):
         self.assertRaises(timer.AlreadyRunningError, rtimer.start)
         rtimer.cancel()
 
-    def fixture_loop(self, max_loop=10):
+    def fixture_loop(self, interval_sec=1, max_loop=10):
         self.event.clear()
-        interval_sec = 1
 
         _sum = summary.summarize(muppy.get_objects())
 
         rtimer = timer.RecursiveTimer(interval_sec, self.dummy_main, max_loop=max_loop)
         rtimer.start()
+        time_start = datetime.now()
         res = self.event.wait(max_loop * interval_sec + 2)
+        time_end = datetime.now()
         rtimer.cancel()
+
+        print("start:" + str(time_start))
+        print("end:" + str(time_end))
 
         _diff = summary.get_diff(_sum, summary.summarize(muppy.get_objects()))
         summary.print_(_diff)
 
+        self.assertGreaterEqual((time_end - time_start).seconds, max_loop * interval_sec)
+        self.assertLessEqual((time_end - time_start).seconds, max_loop * interval_sec + 2)
         self.assertTrue(res)
         self.assertEqual(self.counter, max_loop)
         self.assertFalse(rtimer.is_alive())
 
     def test_short_loop(self):
-        self.fixture_loop(10)
+        self.fixture_loop(1, 5)
 
-    def test_long_loop(self):
-        self.fixture_loop(30)
+    def test_long_loop1(self):
+        self.fixture_loop(2, 10)
+
+    def test_long_loop2(self):
+        self.fixture_loop(5, 4)
 
 if __name__ == "__main__":
     unittest.main()
