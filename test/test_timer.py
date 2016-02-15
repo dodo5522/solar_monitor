@@ -7,8 +7,6 @@ import unittest
 import threading
 
 from datetime import datetime
-from pympler import muppy
-from pympler import summary
 from solar_monitor import timer
 
 
@@ -46,8 +44,6 @@ class TestTimer(unittest.TestCase):
     def fixture_loop(self, interval_sec=1, max_loop=10):
         self.event.clear()
 
-        _sum = summary.summarize(muppy.get_objects())
-
         rtimer = timer.RecursiveTimer(interval_sec, self.dummy_main, max_loop=max_loop)
         rtimer.start()
         time_start = datetime.now()
@@ -57,9 +53,6 @@ class TestTimer(unittest.TestCase):
 
         print("start:" + str(time_start))
         print("end:" + str(time_end))
-
-        _diff = summary.get_diff(_sum, summary.summarize(muppy.get_objects()))
-        summary.print_(_diff)
 
         self.assertGreaterEqual((time_end - time_start).seconds, max_loop * interval_sec)
         self.assertLessEqual((time_end - time_start).seconds, max_loop * interval_sec + 2)
