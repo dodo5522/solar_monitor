@@ -134,9 +134,15 @@ class RecursiveTimer(Logger):
             None
         Returns:
             True if alive
+        >>> rt.start()
+        >>> rt.is_alive()
+        True
+        >>> rt.cancel()
+        >>> rt.is_alive()
+        False
         """
         return self.thread_timer.isAlive()
 
 if __name__ == '__main__':
     import doctest
-    doctest.testmod(extraglobs={'rt': RecursiveTimer()})
+    doctest.testmod(extraglobs={'rt': RecursiveTimer(3, lambda: print(datetime.now()))})
