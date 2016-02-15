@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
-"""
-TS-MPPT-60 monitor application's hook library.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-"""
+"""TS-MPPT-60 monitor event hook library."""
 
 import xively
-from . import BaseEventHandler
+from solar_monitor.hook import BaseEventHandler
 
 
 class XivelyHandler(BaseEventHandler):

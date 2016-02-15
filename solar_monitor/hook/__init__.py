@@ -22,12 +22,15 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
         """Initialize event handelr.
 
         Args:
+            log_file_path: path to output log data
+            debug: debug log is output if True
+            q_max: max queue number
         Returns:
-        Exceptions:
+            Instance object
         """
         self._init_logger(log_file_path, debug)
         self._thread = threading.Thread(target=self._handler, args=())
-        self._thread .setDaemon(True)
+        self._thread.setDaemon(True)
         self._q = queue.Queue(q_max)
 
     def _init_logger(self, log_file_path, debug):
@@ -66,11 +69,23 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
                 pass
 
     def start(self):
-        """ Start event handler thread. """
+        """Start event handler thread.
+
+        Args:
+            None
+        Returns:
+            None
+        """
         self._thread.start()
 
     def join(self):
-        """ Kill event handler thread. """
+        """Kill event handler thread.
+
+        Args:
+            None
+        Returns:
+            None
+        """
         self._q.put(None, timeout=5)
         self._thread.join(timeout=5)
 
@@ -100,4 +115,12 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def exec(self, rawdata):
+        """This function must be implemented in the inherited class.
+           To run the main function for this handler thread.
+
+        Args:
+            rawdata: Raw data formated dict.
+        Returns:
+            None
+        """
         raise NotImplementedError
