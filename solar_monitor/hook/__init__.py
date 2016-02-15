@@ -60,13 +60,12 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
                     break
 
                 self.exec(rawdata)
-                self._q.task_done()
 
             except Exception as e:
                 self.logger.debug(str(e) + ' error!!!')
 
             finally:
-                pass
+                self._q.task_done()
 
     def start(self):
         """Start event handler thread.
