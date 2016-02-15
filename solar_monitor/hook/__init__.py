@@ -59,7 +59,6 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
 
             except Exception as e:
                 self.logger.debug(str(e) + ' error!!!')
-                raise
 
             finally:
                 pass
