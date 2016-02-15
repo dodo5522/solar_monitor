@@ -49,6 +49,8 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
     def _handler(self, *args, **kwargs):
         while True:
             try:
+                if 'rawdata' in locals():
+                    del rawdata
                 rawdata = self._q.get()
 
                 if rawdata is None:
