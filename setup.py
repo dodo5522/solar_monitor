@@ -24,7 +24,7 @@ def requires():
 
 setup(
     name='solar_monitor',
-    version='1.4.1',
+    version='1.5.0',
     description='Solar charge controller monitor like TS-MPPT-60',
     long_description=readme(),
     license="GPLv2",
