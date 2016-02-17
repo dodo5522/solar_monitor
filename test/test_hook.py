@@ -25,7 +25,7 @@ class TestBatteryHandler(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def set_fixture_edge(self, first, second, target):
+    def set_fixture_edge(self, first, second, target, target_edge=BatteryHandler.EDGE_FALLING):
         class _Proc(object):
             pass
 
@@ -34,7 +34,7 @@ class TestBatteryHandler(unittest.TestCase):
 
         pat = patch('solar_monitor.hook.battery.subprocess.Popen', autospec=True, return_value=proc)
         popen = pat.start()
-        bat = BatteryHandler(cmd='ls', target_edge=BatteryHandler.EDGE_FALLING, target_volt=target)
+        bat = BatteryHandler(cmd='ls', target_edge=target_edge, target_volt=target)
 
         rawdata = {}
         rawdata['at'] = datetime.now()
@@ -48,17 +48,41 @@ class TestBatteryHandler(unittest.TestCase):
 
         return (proc, popen)
 
-    def test_exec_none(self):
+    def test_exec_none_w_falling_set(self):
         proc, popen = self.set_fixture_edge(12.5, 12.5, 12.0)
 
         proc.communicate.assert_not_called()
         popen.assert_not_called()
 
-    def test_exec_falling(self):
+    def test_exec_rising_w_falling_set(self):
+        proc, popen = self.set_fixture_edge(12.5, 13.0, 12.0)
+
+        proc.communicate.assert_not_called()
+        popen.assert_not_called()
+
+    def test_exec_falling_w_falling_set(self):
         proc, popen = self.set_fixture_edge(12.5, 11.5, 12.0)
 
         proc.communicate.assert_called_once_with()
         popen.assert_called_once_with(['ls'], stdout=PIPE, stderr=PIPE)
+
+    def test_exec_none_w_rising_set(self):
+        proc, popen = self.set_fixture_edge(12.5, 12.5, 12.0, target_edge=BatteryHandler.EDGE_RISING)
+
+        proc.communicate.assert_not_called()
+        popen.assert_not_called()
+
+    def test_exec_rising_w_rising_set(self):
+        proc, popen = self.set_fixture_edge(12.5, 13.0, 12.0, target_edge=BatteryHandler.EDGE_RISING)
+
+        proc.communicate.assert_called_once_with()
+        popen.assert_called_once_with(['ls'], stdout=PIPE, stderr=PIPE)
+
+    def test_exec_falling_w_rising_set(self):
+        proc, popen = self.set_fixture_edge(12.5, 11.5, 12.0, target_edge=BatteryHandler.EDGE_RISING)
+
+        proc.communicate.assert_not_called()
+        popen.assert_not_called()
 
 if __name__ == "__main__":
     unittest.main()
