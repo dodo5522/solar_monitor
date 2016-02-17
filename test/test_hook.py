@@ -84,5 +84,39 @@ class TestBatteryHandler(unittest.TestCase):
         proc.communicate.assert_not_called()
         popen.assert_not_called()
 
+class TestXivelyHandler(unittest.TestCase):
+    """test XivelyHandler class."""
+
+    @classmethod
+    def setUpClass(cls):
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+class TestKeenioHandler(unittest.TestCase):
+    """test KeenIoHandler class."""
+
+    @classmethod
+    def setUpClass(cls):
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
 if __name__ == "__main__":
     unittest.main()
