@@ -25,29 +25,40 @@ class TestBatteryHandler(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_exec_falling(self):
+    def set_fixture_edge(self, first, second, target):
         class _Proc(object):
             pass
 
         proc = _Proc()
         proc.communicate = MagicMock(return_value=(b'', b''))
 
-        _p = patch('solar_monitor.hook.battery.subprocess.Popen', autospec=True, return_value=proc)
-        _m = _p.start()
-        bat = BatteryHandler(cmd='ls', target_edge=BatteryHandler.EDGE_FALLING, target_volt=12.0)
+        pat = patch('solar_monitor.hook.battery.subprocess.Popen', autospec=True, return_value=proc)
+        popen = pat.start()
+        bat = BatteryHandler(cmd='ls', target_edge=BatteryHandler.EDGE_FALLING, target_volt=target)
 
         rawdata = {}
         rawdata['at'] = datetime.now()
-        rawdata['data'] = {'Battery Voltage': {'value': 12.5}}
+        rawdata['data'] = {'Battery Voltage': {'value': first}}
         bat.exec(rawdata)
 
-        rawdata['data']['Battery Voltage']['value'] = 11.5
+        rawdata['data']['Battery Voltage']['value'] = second
         bat.exec(rawdata)
 
-        _p.stop()
+        pat.stop()
+
+        return (proc, popen)
+
+    def test_exec_none(self):
+        proc, popen = self.set_fixture_edge(12.5, 12.5, 12.0)
+
+        proc.communicate.assert_not_called()
+        popen.assert_not_called()
+
+    def test_exec_falling(self):
+        proc, popen = self.set_fixture_edge(12.5, 11.5, 12.0)
 
         proc.communicate.assert_called_once_with()
-        _m.assert_called_once_with(['ls'], stdout=PIPE, stderr=PIPE)
+        popen.assert_called_once_with(['ls'], stdout=PIPE, stderr=PIPE)
 
 if __name__ == "__main__":
     unittest.main()
