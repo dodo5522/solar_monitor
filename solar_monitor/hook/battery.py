@@ -105,4 +105,4 @@ class BatteryHandler(BaseEventHandler):
 
         self.logger.info(
             "{} is executed and returned below values.".format(self._cmd))
-        self.logger.info(stdout_data)
+        self.logger.info(stdout_data.decode())
