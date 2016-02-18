@@ -51,14 +51,20 @@ class TestBatteryHandler(unittest.TestCase):
     def test_exec_none_w_falling_set(self):
         proc, popen = self.set_fixture_edge(12.5, 12.5, 12.0)
 
-        proc.communicate.assert_not_called()
-        popen.assert_not_called()
+        try:
+            proc.communicate.assert_not_called()
+            popen.assert_not_called()
+        except AttributeError as _e:
+            print(str(_e) + '(maybe your python3 version is less than 3.5.')
 
     def test_exec_rising_w_falling_set(self):
         proc, popen = self.set_fixture_edge(12.5, 13.0, 12.0)
 
-        proc.communicate.assert_not_called()
-        popen.assert_not_called()
+        try:
+            proc.communicate.assert_not_called()
+            popen.assert_not_called()
+        except AttributeError as _e:
+            print(str(_e) + '(maybe your python3 version is less than 3.5.')
 
     def test_exec_falling_w_falling_set(self):
         proc, popen = self.set_fixture_edge(12.5, 11.5, 12.0)
@@ -69,8 +75,11 @@ class TestBatteryHandler(unittest.TestCase):
     def test_exec_none_w_rising_set(self):
         proc, popen = self.set_fixture_edge(12.5, 12.5, 12.0, target_edge=BatteryHandler.EDGE_RISING)
 
-        proc.communicate.assert_not_called()
-        popen.assert_not_called()
+        try:
+            proc.communicate.assert_not_called()
+            popen.assert_not_called()
+        except AttributeError as _e:
+            print(str(_e) + '(maybe your python3 version is less than 3.5.')
 
     def test_exec_rising_w_rising_set(self):
         proc, popen = self.set_fixture_edge(12.5, 13.0, 12.0, target_edge=BatteryHandler.EDGE_RISING)
@@ -81,8 +90,11 @@ class TestBatteryHandler(unittest.TestCase):
     def test_exec_falling_w_rising_set(self):
         proc, popen = self.set_fixture_edge(12.5, 11.5, 12.0, target_edge=BatteryHandler.EDGE_RISING)
 
-        proc.communicate.assert_not_called()
-        popen.assert_not_called()
+        try:
+            proc.communicate.assert_not_called()
+            popen.assert_not_called()
+        except AttributeError as _e:
+            print(str(_e) + '(maybe your python3 version is less than 3.5.')
 
 class TestXivelyHandler(unittest.TestCase):
     """test XivelyHandler class."""
