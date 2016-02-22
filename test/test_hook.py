@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
+import sys
 import unittest
 from datetime import datetime
 from solar_monitor.hook.battery import BatteryHandler
 from subprocess import PIPE
 from unittest.mock import patch
 from unittest.mock import MagicMock
+
 
 class TestBatteryHandler(unittest.TestCase):
     """test BatteryHandler class."""
@@ -48,6 +50,7 @@ class TestBatteryHandler(unittest.TestCase):
 
         return (proc, popen)
 
+    @unittest.skipIf(sys.version_info < (3, 5), "This python version doesn't support assert_not_called()")
     def test_exec_none_w_falling_set(self):
         proc, popen = self.set_fixture_edge(12.5, 12.5, 12.0)
 
@@ -57,6 +60,7 @@ class TestBatteryHandler(unittest.TestCase):
         except AttributeError as _e:
             print(str(_e) + '(maybe your python3 version is less than 3.5.')
 
+    @unittest.skipIf(sys.version_info < (3, 5), "This python version doesn't support assert_not_called()")
     def test_exec_rising_w_falling_set(self):
         proc, popen = self.set_fixture_edge(12.5, 13.0, 12.0)
 
@@ -72,6 +76,7 @@ class TestBatteryHandler(unittest.TestCase):
         proc.communicate.assert_called_once_with()
         popen.assert_called_once_with(['ls'], stdout=PIPE, stderr=PIPE)
 
+    @unittest.skipIf(sys.version_info < (3, 5), "This python version doesn't support assert_not_called()")
     def test_exec_none_w_rising_set(self):
         proc, popen = self.set_fixture_edge(12.5, 12.5, 12.0, target_edge=BatteryHandler.EDGE_RISING)
 
@@ -87,6 +92,7 @@ class TestBatteryHandler(unittest.TestCase):
         proc.communicate.assert_called_once_with()
         popen.assert_called_once_with(['ls'], stdout=PIPE, stderr=PIPE)
 
+    @unittest.skipIf(sys.version_info < (3, 5), "This python version doesn't support assert_not_called()")
     def test_exec_falling_w_rising_set(self):
         proc, popen = self.set_fixture_edge(12.5, 11.5, 12.0, target_edge=BatteryHandler.EDGE_RISING)
 
@@ -95,6 +101,7 @@ class TestBatteryHandler(unittest.TestCase):
             popen.assert_not_called()
         except AttributeError as _e:
             print(str(_e) + '(maybe your python3 version is less than 3.5.')
+
 
 class TestXivelyHandler(unittest.TestCase):
     """test XivelyHandler class."""
@@ -112,6 +119,7 @@ class TestXivelyHandler(unittest.TestCase):
 
     def tearDown(self):
         pass
+
 
 class TestKeenioHandler(unittest.TestCase):
     """test KeenIoHandler class."""
