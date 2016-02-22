@@ -41,7 +41,7 @@ class TestTimer(unittest.TestCase):
         self.assertRaises(timer.AlreadyRunningError, rtimer.start)
         rtimer.cancel()
 
-    def fixture_loop(self, interval_sec=1, max_loop=10):
+    def setUp_loop(self, interval_sec=1, max_loop=10):
         self.event.clear()
 
         rtimer = timer.RecursiveTimer(interval_sec, self.dummy_main, max_loop=max_loop)
@@ -61,13 +61,13 @@ class TestTimer(unittest.TestCase):
         self.assertFalse(rtimer.is_alive())
 
     def test_short_loop(self):
-        self.fixture_loop(1, 5)
+        self.setUp_loop(interval_sec=1, max_loop=5)
 
     def test_long_loop1(self):
-        self.fixture_loop(2, 10)
+        self.setUp_loop(interval_sec=2, max_loop=10)
 
     def test_long_loop2(self):
-        self.fixture_loop(5, 4)
+        self.setUp_loop(interval_sec=5, max_loop=4)
 
 if __name__ == "__main__":
     unittest.main()
