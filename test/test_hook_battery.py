@@ -27,7 +27,7 @@ class TestBatteryHandler(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def set_fixture_edge(self, first, second, target, target_edge=BatteryHandler.EDGE_FALLING):
+    def setUp_edge(self, first, second, target, target_edge=BatteryHandler.EDGE_FALLING):
         class _Proc(object):
             pass
 
@@ -52,7 +52,7 @@ class TestBatteryHandler(unittest.TestCase):
 
     @unittest.skipIf(sys.version_info < (3, 5), "This python version doesn't support assert_not_called()")
     def test_exec_none_w_falling_set(self):
-        proc, popen = self.set_fixture_edge(12.5, 12.5, 12.0)
+        proc, popen = self.setUp_edge(12.5, 12.5, 12.0)
 
         try:
             proc.communicate.assert_not_called()
@@ -62,7 +62,7 @@ class TestBatteryHandler(unittest.TestCase):
 
     @unittest.skipIf(sys.version_info < (3, 5), "This python version doesn't support assert_not_called()")
     def test_exec_rising_w_falling_set(self):
-        proc, popen = self.set_fixture_edge(12.5, 13.0, 12.0)
+        proc, popen = self.setUp_edge(12.5, 13.0, 12.0)
 
         try:
             proc.communicate.assert_not_called()
@@ -71,14 +71,14 @@ class TestBatteryHandler(unittest.TestCase):
             print(str(_e) + '(maybe your python3 version is less than 3.5.')
 
     def test_exec_falling_w_falling_set(self):
-        proc, popen = self.set_fixture_edge(12.5, 11.5, 12.0)
+        proc, popen = self.setUp_edge(12.5, 11.5, 12.0)
 
         proc.communicate.assert_called_once_with()
         popen.assert_called_once_with(['ls'], stdout=PIPE, stderr=PIPE)
 
     @unittest.skipIf(sys.version_info < (3, 5), "This python version doesn't support assert_not_called()")
     def test_exec_none_w_rising_set(self):
-        proc, popen = self.set_fixture_edge(12.5, 12.5, 12.0, target_edge=BatteryHandler.EDGE_RISING)
+        proc, popen = self.setUp_edge(12.5, 12.5, 12.0, target_edge=BatteryHandler.EDGE_RISING)
 
         try:
             proc.communicate.assert_not_called()
@@ -87,14 +87,14 @@ class TestBatteryHandler(unittest.TestCase):
             print(str(_e) + '(maybe your python3 version is less than 3.5.')
 
     def test_exec_rising_w_rising_set(self):
-        proc, popen = self.set_fixture_edge(12.5, 13.0, 12.0, target_edge=BatteryHandler.EDGE_RISING)
+        proc, popen = self.setUp_edge(12.5, 13.0, 12.0, target_edge=BatteryHandler.EDGE_RISING)
 
         proc.communicate.assert_called_once_with()
         popen.assert_called_once_with(['ls'], stdout=PIPE, stderr=PIPE)
 
     @unittest.skipIf(sys.version_info < (3, 5), "This python version doesn't support assert_not_called()")
     def test_exec_falling_w_rising_set(self):
-        proc, popen = self.set_fixture_edge(12.5, 11.5, 12.0, target_edge=BatteryHandler.EDGE_RISING)
+        proc, popen = self.setUp_edge(12.5, 11.5, 12.0, target_edge=BatteryHandler.EDGE_RISING)
 
         try:
             proc.communicate.assert_not_called()
@@ -102,41 +102,6 @@ class TestBatteryHandler(unittest.TestCase):
         except AttributeError as _e:
             print(str(_e) + '(maybe your python3 version is less than 3.5.')
 
-
-class TestXivelyHandler(unittest.TestCase):
-    """test XivelyHandler class."""
-
-    @classmethod
-    def setUpClass(cls):
-        pass
-
-    @classmethod
-    def tearDownClass(cls):
-        pass
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-
-class TestKeenioHandler(unittest.TestCase):
-    """test KeenIoHandler class."""
-
-    @classmethod
-    def setUpClass(cls):
-        pass
-
-    @classmethod
-    def tearDownClass(cls):
-        pass
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
 
 if __name__ == "__main__":
     unittest.main()
