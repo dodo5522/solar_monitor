@@ -52,20 +52,20 @@ class TestBatteryHandler(unittest.TestCase):
 
     @unittest.skipIf(sys.version_info < (3, 5), "This python version doesn't support assert_not_called()")
     def test_exec_none_w_falling_set(self):
-        proc, popen = self.setUp_edge(12.5, 12.5, 12.0)
+        proc, popen = self.setUp_edge(12.5, 12.5, 12.0, target_edge=BatteryHandler.EDGE_FALLING)
 
         proc.communicate.assert_not_called()
         popen.assert_not_called()
 
     @unittest.skipIf(sys.version_info < (3, 5), "This python version doesn't support assert_not_called()")
     def test_exec_rising_w_falling_set(self):
-        proc, popen = self.setUp_edge(12.5, 13.0, 12.0)
+        proc, popen = self.setUp_edge(12.5, 13.0, 12.0, target_edge=BatteryHandler.EDGE_FALLING)
 
         proc.communicate.assert_not_called()
         popen.assert_not_called()
 
     def test_exec_falling_w_falling_set(self):
-        proc, popen = self.setUp_edge(12.5, 11.5, 12.0)
+        proc, popen = self.setUp_edge(12.5, 11.5, 12.0, target_edge=BatteryHandler.EDGE_FALLING)
 
         proc.communicate.assert_called_once_with()
         popen.assert_called_once_with(['ls'], stdout=PIPE, stderr=PIPE)
