@@ -28,14 +28,17 @@ class KeenIoHandler(BaseEventHandler):
         Args:
         Returns:
         """
-        self.logger.debug("send data to keenio at {}".format(rawdata["at"]))
+        data_source = rawdata["source"]
+        got_date = rawdata["at"]
 
-        _newdata_list = []
-        for key, data in rawdata["data"].items():
-            _newdata = data
-            _newdata["label"] = key
-            _newdata["source"] = rawdata["source"]
-            _newdata["keen"] = {"timestamp": rawdata["at"].isoformat() + "Z"}
-            _newdata_list.append(_newdata)
+        self.logger.debug("send data to keenio at {}".format(got_date))
 
-        self.client.add_events({"offgrid": _newdata_list})
+        datalist_keenio = []
+        for monitoring_item, got_data in rawdata["data"].items():
+            data_for_keenio = got_data
+            data_for_keenio["label"] = monitoring_item
+            data_for_keenio["source"] = data_source
+            data_for_keenio["keen"] = {"timestamp": got_date.isoformat() + "Z"}
+            datalist_keenio.append(data_for_keenio)
+
+        self.client.add_events({"offgrid": datalist_keenio})
