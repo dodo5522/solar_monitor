@@ -25,7 +25,7 @@ class TestKeenioHandler(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_exec_(self):
+    def test_exec(self):
         class _DummyKeenClient(object):
             pass
 
@@ -54,12 +54,17 @@ class TestKeenioHandler(unittest.TestCase):
 
         self.maxDiff = None
         self.assertEqual(kc.add_events.call_count, 1)
-        self.assertEqual(kc.add_events.call_args[0][0], {
-            'offgrid': [
-                {'value': 1.4, 'unit': 'A', 'group': 'Array', 'source': 'solar', 'keen': {'timestamp': args['at'].isoformat() + 'Z'}, 'label': 'Array Current'},
-                {'value': 53.41, 'unit': 'V', 'group': 'Array', 'source': 'solar', 'keen': {'timestamp': args['at'].isoformat() + 'Z'}, 'label': 'Array Voltage'}
-            ]
-        })
+
+        for items in kc.add_events.call_args[0][0]['offgrid']:
+            self.assertIn('keen', items)
+            items.pop('keen')
+            self.assertEqual('solar', items['source'])
+            items.pop('source')
+
+        for items in kc.add_events.call_args[0][0]['offgrid']:
+            label = items.pop('label')
+            self.assertEqual(set(args['data'][label].items()), set(items.items()))
+
 
 if __name__ == "__main__":
     unittest.main()
