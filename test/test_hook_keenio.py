@@ -29,6 +29,9 @@ class TestKeenioHandler(unittest.TestCase):
         class _DummyKeenClient(object):
             pass
 
+        # 差分表示の上限をなくす
+        self.maxDiff = None
+
         kc = _DummyKeenClient()
         kc.add_events = MagicMock(return_value=None)
 
@@ -51,8 +54,6 @@ class TestKeenioHandler(unittest.TestCase):
         kc_patch.stop()
 
         mock_kc.assert_called_once_with(project_id=dummy_project_id, write_key=dummy_write_key)
-
-        self.maxDiff = None
         self.assertEqual(kc.add_events.call_count, 1)
 
         for items in kc.add_events.call_args[0][0]['offgrid']:
