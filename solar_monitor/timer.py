@@ -60,19 +60,12 @@ class RecursiveTimer(Logger):
         start_time = datetime.now()
 
         while True:
-            time.sleep(0.5)
+            time.sleep(1)
 
             if self.event_stop_timer.isSet():
                 break
 
-            if 'now_time' in locals():
-                del now_time
-            now_time = datetime.now()
-
-            if (now_time - start_time).seconds >= self.interval:
-                if 'start_time' in locals():
-                    del start_time
-                start_time = now_time
+            if ((datetime.now() - start_time).seconds / self.interval).is_integer():
                 event_tick.set()
 
         event_tick.set()
