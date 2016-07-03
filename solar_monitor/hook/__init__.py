@@ -13,7 +13,8 @@ import logging
 
 
 class BaseEventHandler(metaclass=abc.ABCMeta):
-    """Event handeler abstract class."""
+    """Event handeler abstract class. Must implement exec() method.
+    """
 
     _FORMAT_LOG_MSG = "%(asctime)s %(name)s %(levelname)s: %(message)s"
     _FORMAT_LOG_DATE = "%Y/%m/%d %p %l:%M:%S"
@@ -68,7 +69,7 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
                 self._q.task_done()
 
     def start(self):
-        """Start event handler thread.
+        """Start event handler thread which calls exec() method.
 
         Args:
             None
@@ -78,7 +79,7 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
         self._thread.start()
 
     def join(self):
-        """Kill event handler thread.
+        """Kill event handler thread and wait joining.
 
         Args:
             None
@@ -89,7 +90,7 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
         self._thread.join(timeout=5)
 
     def put_q(self, item):
-        """Put data to the internal queue.
+        """Put data to the internal queue which is passed to exec() method.
 
         Args:
             item: data putting to the internal queue
@@ -103,7 +104,7 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
         self._q.put_nowait(item)
 
     def join_q(self):
-        """Wait for joining the internal queue.
+        """Wait for joining the internal queue which is passed to exec() method.
 
         Args:
             None
@@ -119,6 +120,7 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
 
         Args:
             rawdata: Raw data formated dict.
+                     This is passed by queue.
         Returns:
             None
         """
