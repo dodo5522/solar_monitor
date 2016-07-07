@@ -3,7 +3,6 @@
 
 """
 TS-MPPT-60 monitor application's hook library.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
 import abc
@@ -125,3 +124,69 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
             None
         """
         raise NotImplementedError
+
+
+class BaseBatteryEventHandler(BaseEventHandler):
+    """Battery event handeler abstract class based with BaseEventHandler.
+       Must implement exec() method.
+    """
+    EDGE_NONE = 0
+    EDGE_RISING = 1
+    EDGE_FALLING = 2
+
+    def __init__(self, log_file_path=None, debug=False, q_max=5,
+                 cmd=None, target_edge=EDGE_FALLING, threshold_voltage=12.0):
+        """Initialize instance object.
+
+        Args:
+            log_file_path: path to output log data
+            debug: debug log is output if True
+            q_max: max queue number
+            cmd: command to execute when the specified event is triggered
+            target_edge: folling or rising edge if specified
+            threshold_voltage: the threshold of voltage to judge the event is triggered
+        Returns:
+            Instance object
+        """
+        BaseEventHandler.__init__(self, log_file_path, debug, q_max)
+
+        self._cmd = cmd
+        self._threshold_voltage = threshold_voltage
+        self._target_edge = target_edge
+
+    def is_battery_event_triggered(self, cur_volt, prev_volt):
+        """ Check the condition of battery. If the class instance is initialized with FALLING_EDGE and the battery voltage is getting to be lower than threshold_voltage, this method returns True. If the class instance is initialized with RISING_EDGE and the battery voltage is getting to be higher than threshold_voltage, this method returns True. Else returns False.
+
+        Keyword arguments:
+            cur_volt: current voltage of battery
+            prev_volt: current voltage of battery
+
+        Returns: True if condition is matched
+        """
+        if prev_volt is None:
+            return False
+
+        if cur_volt < prev_volt:
+            cur_edge = self.EDGE_FALLING
+        elif cur_volt > prev_volt:
+            cur_edge = self.EDGE_RISING
+        else:
+            cur_edge = self.EDGE_NONE
+
+        self.logger.debug("cur_volt: " + str(cur_volt))
+        self.logger.debug("prev_volt: " + str(prev_volt))
+        self.logger.debug("cur_edge: " + str(cur_edge))
+        self.logger.debug("target_edge: " + str(self._target_edge))
+
+        condition = False
+
+        if self._target_edge is self.EDGE_RISING:
+            if cur_edge is self.EDGE_RISING:
+                if cur_volt > self._threshold_voltage:
+                    condition = True
+        elif self._target_edge is self.EDGE_FALLING:
+            if cur_edge is self.EDGE_FALLING:
+                if cur_volt < self._threshold_voltage:
+                    condition = True
+
+        return condition

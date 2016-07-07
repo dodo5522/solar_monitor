@@ -143,7 +143,7 @@ class Main(object):
                     debug=self.args.debug,
                     cmd=self.args.battery_limit_hook_script,
                     target_edge=BatteryHandler.EDGE_FALLING,
-                    target_volt=self.args.battery_limit))
+                    threshold_voltage=self.args.battery_limit))
 
         if self.args.keenio_project_id and self.args.keenio_write_key:
             self._event_handlers.append(
