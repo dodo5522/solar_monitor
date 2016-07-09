@@ -13,21 +13,19 @@ import logging
 
 class BaseEventHandler(metaclass=abc.ABCMeta):
     """Event handeler abstract class. Must implement exec() method.
+
+    Args:
+        log_file_path: path to output log data
+        debug: debug log is output if True
+        q_max: max queue number
+    Returns:
+        Instance object
     """
 
     _FORMAT_LOG_MSG = "%(asctime)s %(name)s %(levelname)s: %(message)s"
     _FORMAT_LOG_DATE = "%Y/%m/%d %p %l:%M:%S"
 
     def __init__(self, log_file_path=None, debug=False, q_max=5):
-        """Initialize event handelr.
-
-        Args:
-            log_file_path: path to output log data
-            debug: debug log is output if True
-            q_max: max queue number
-        Returns:
-            Instance object
-        """
         self._init_logger(log_file_path, debug)
         self._thread = threading.Thread(target=self._handler, args=())
         self._thread.setDaemon(True)
@@ -129,6 +127,16 @@ class BaseEventHandler(metaclass=abc.ABCMeta):
 class BaseBatteryEventHandler(BaseEventHandler):
     """Battery event handeler abstract class based with BaseEventHandler.
        Must implement exec() method.
+
+    Args:
+        log_file_path: path to output log data
+        debug: debug log is output if True
+        q_max: max queue number
+        cmd: command to execute when the specified event is triggered
+        target_edge: folling or rising edge if specified
+        threshold_voltage: the threshold of voltage to judge the event is triggered
+    Returns:
+        Instance object
     """
     EDGE_NONE = 0
     EDGE_RISING = 1
@@ -136,18 +144,6 @@ class BaseBatteryEventHandler(BaseEventHandler):
 
     def __init__(self, log_file_path=None, debug=False, q_max=5,
                  cmd=None, target_edge=EDGE_FALLING, threshold_voltage=12.0):
-        """Initialize instance object.
-
-        Args:
-            log_file_path: path to output log data
-            debug: debug log is output if True
-            q_max: max queue number
-            cmd: command to execute when the specified event is triggered
-            target_edge: folling or rising edge if specified
-            threshold_voltage: the threshold of voltage to judge the event is triggered
-        Returns:
-            Instance object
-        """
         BaseEventHandler.__init__(self, log_file_path, debug, q_max)
 
         self._cmd = cmd

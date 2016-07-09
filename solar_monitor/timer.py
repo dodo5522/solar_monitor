@@ -16,22 +16,21 @@ class AlreadyRunningError(Exception):
 
 
 class RecursiveTimer(Logger):
-    """Class of timer for recursively running function."""
+    """Class of timer for recursively running function.
+
+    Keyword arguments:
+        interval: interval time as second
+        target_func: callable object to run by timer event.
+                     this function should have keyword arguments but NOT arguments.
+        log_file_path: file path of log file to output
+        debug: enable debug mode if True
+        kwargs: object to be passed to the specified target_func
+
+    Returns:
+        timer object
+    """
 
     def __init__(self, interval, target_func, log_file_path=None, debug=False, **target_kwargs):
-        """Recursive timer
-
-        Keyword arguments:
-            interval: interval time as second
-            target_func: callable object to run by timer event.
-                         this function should have keyword arguments but NOT arguments.
-            log_file_path: file path of log file to output
-            debug: enable debug mode if True
-            kwargs: object to be passed to the specified target_func
-
-        Returns:
-            timer object
-        """
         Logger.__init__(self, log_file_path, debug)
 
         self.interval = interval

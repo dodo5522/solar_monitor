@@ -20,8 +20,8 @@ from solar_monitor.timer import RecursiveTimer
 
 
 class Main(object):
-    """main routine class definition.
-    """
+    """main routine class definition."""
+
     _FORMAT_LOG_MSG = "%(asctime)s %(name)s %(levelname)s: %(message)s"
     _FORMAT_LOG_DATE = "%Y/%m/%d %p %l:%M:%S"
 
