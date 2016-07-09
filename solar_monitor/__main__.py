@@ -20,8 +20,8 @@ from solar_monitor.timer import RecursiveTimer
 
 
 class Main(object):
-    """main routine class definition.
-    """
+    """main routine class definition."""
+
     _FORMAT_LOG_MSG = "%(asctime)s %(name)s %(levelname)s: %(message)s"
     _FORMAT_LOG_DATE = "%Y/%m/%d %p %l:%M:%S"
 
@@ -143,7 +143,7 @@ class Main(object):
                     debug=self.args.debug,
                     cmd=self.args.battery_limit_hook_script,
                     target_edge=BatteryHandler.EDGE_FALLING,
-                    target_volt=self.args.battery_limit))
+                    threshold_voltage=self.args.battery_limit))
 
         if self.args.keenio_project_id and self.args.keenio_write_key:
             self._event_handlers.append(

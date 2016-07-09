@@ -27,68 +27,153 @@ class TestBatteryHandler(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def setUp_edge(self, first, second, target, target_edge=BatteryHandler.EDGE_FALLING):
-        class _Proc(object):
+    @unittest.skipIf(sys.version_info < (3, 5), "This python version doesn't support assert_not_called()")
+    @patch('solar_monitor.hook.battery.subprocess.Popen', autospec=True)
+    def test_exec_none_w_falling_set(self, MockPopen):
+        class DummyProc(object):
             pass
 
-        proc = _Proc()
+        # prepare test environment
+        proc = DummyProc()
         proc.communicate = MagicMock(return_value=(b'', b''))
+        MockPopen.return_value = proc
 
-        pat = patch('solar_monitor.hook.battery.subprocess.Popen', autospec=True, return_value=proc)
-        popen = pat.start()
-        bat = BatteryHandler(cmd='ls', target_edge=target_edge, target_volt=target)
+        battery = BatteryHandler(cmd='ls', target_edge=BatteryHandler.EDGE_FALLING, threshold_voltage=12.0)
 
         rawdata = {}
         rawdata['at'] = datetime.now()
-        rawdata['data'] = {'Battery Voltage': {'value': first}}
-        bat.exec(rawdata)
+        rawdata['data'] = {'Battery Voltage': {'value': 12.5}}
+        battery.exec(rawdata)
 
-        rawdata['data']['Battery Voltage']['value'] = second
-        bat.exec(rawdata)
+        rawdata['data'] = {'Battery Voltage': {'value': 12.5}}
+        battery.exec(rawdata)
 
-        pat.stop()
-
-        return (proc, popen)
+        # verify
+        proc.communicate.assert_not_called()
+        MockPopen.assert_not_called()
 
     @unittest.skipIf(sys.version_info < (3, 5), "This python version doesn't support assert_not_called()")
-    def test_exec_none_w_falling_set(self):
-        proc, popen = self.setUp_edge(12.5, 12.5, 12.0, target_edge=BatteryHandler.EDGE_FALLING)
+    @patch("solar_monitor.hook.battery.subprocess.Popen", autospec=True)
+    def test_exec_rising_w_falling_set(self, MockPopen):
+        class DummyProc(object):
+            pass
 
+        # prepare test environment
+        proc = DummyProc()
+        proc.communicate = MagicMock(return_value=(b'', b''))
+        MockPopen.return_value = proc
+
+        battery = BatteryHandler(cmd='ls', target_edge=BatteryHandler.EDGE_FALLING, threshold_voltage=12.0)
+
+        rawdata = {}
+        rawdata['at'] = datetime.now()
+        rawdata['data'] = {'Battery Voltage': {'value': 12.5}}
+        battery.exec(rawdata)
+
+        rawdata['data'] = {'Battery Voltage': {'value': 13.0}}
+        battery.exec(rawdata)
+
+        # verify
         proc.communicate.assert_not_called()
-        popen.assert_not_called()
+        MockPopen.assert_not_called()
 
-    @unittest.skipIf(sys.version_info < (3, 5), "This python version doesn't support assert_not_called()")
-    def test_exec_rising_w_falling_set(self):
-        proc, popen = self.setUp_edge(12.5, 13.0, 12.0, target_edge=BatteryHandler.EDGE_FALLING)
+    @patch("solar_monitor.hook.battery.subprocess.Popen", autospec=True)
+    def test_exec_falling_w_falling_set(self, MockPopen):
+        class DummyProc(object):
+            pass
 
-        proc.communicate.assert_not_called()
-        popen.assert_not_called()
+        # prepare test environment
+        proc = DummyProc()
+        proc.communicate = MagicMock(return_value=(b'', b''))
+        MockPopen.return_value = proc
 
-    def test_exec_falling_w_falling_set(self):
-        proc, popen = self.setUp_edge(12.5, 11.5, 12.0, target_edge=BatteryHandler.EDGE_FALLING)
+        battery = BatteryHandler(cmd='ls', target_edge=BatteryHandler.EDGE_FALLING, threshold_voltage=12.0)
 
+        rawdata = {}
+        rawdata['at'] = datetime.now()
+        rawdata['data'] = {'Battery Voltage': {'value': 12.5}}
+        battery.exec(rawdata)
+
+        rawdata['data'] = {'Battery Voltage': {'value': 11.5}}
+        battery.exec(rawdata)
+
+        # verify
         proc.communicate.assert_called_once_with()
-        popen.assert_called_once_with(['ls'], stdout=PIPE, stderr=PIPE)
+        MockPopen.assert_called_once_with(['ls'], stdout=PIPE, stderr=PIPE)
 
     @unittest.skipIf(sys.version_info < (3, 5), "This python version doesn't support assert_not_called()")
-    def test_exec_none_w_rising_set(self):
-        proc, popen = self.setUp_edge(12.5, 12.5, 12.0, target_edge=BatteryHandler.EDGE_RISING)
+    @patch("solar_monitor.hook.battery.subprocess.Popen", autospec=True)
+    def test_exec_none_w_rising_set(self, MockPopen):
+        class DummyProc(object):
+            pass
 
+        # prepare test environment
+        proc = DummyProc()
+        proc.communicate = MagicMock(return_value=(b'', b''))
+        MockPopen.return_value = proc
+
+        battery = BatteryHandler(cmd='ls', target_edge=BatteryHandler.EDGE_RISING, threshold_voltage=12.0)
+
+        rawdata = {}
+        rawdata['at'] = datetime.now()
+        rawdata['data'] = {'Battery Voltage': {'value': 12.5}}
+        battery.exec(rawdata)
+
+        rawdata['data'] = {'Battery Voltage': {'value': 12.5}}
+        battery.exec(rawdata)
+
+        # verify
         proc.communicate.assert_not_called()
-        popen.assert_not_called()
+        MockPopen.assert_not_called()
 
-    def test_exec_rising_w_rising_set(self):
-        proc, popen = self.setUp_edge(12.5, 13.0, 12.0, target_edge=BatteryHandler.EDGE_RISING)
+    @patch("solar_monitor.hook.battery.subprocess.Popen", autospec=True)
+    def test_exec_rising_w_rising_set(self, MockPopen):
+        class DummyProc(object):
+            pass
 
+        # prepare test environment
+        proc = DummyProc()
+        proc.communicate = MagicMock(return_value=(b'', b''))
+        MockPopen.return_value = proc
+
+        battery = BatteryHandler(cmd='ls', target_edge=BatteryHandler.EDGE_RISING, threshold_voltage=12.0)
+
+        rawdata = {}
+        rawdata['at'] = datetime.now()
+        rawdata['data'] = {'Battery Voltage': {'value': 12.5}}
+        battery.exec(rawdata)
+
+        rawdata['data'] = {'Battery Voltage': {'value': 13.0}}
+        battery.exec(rawdata)
+
+        # verify
         proc.communicate.assert_called_once_with()
-        popen.assert_called_once_with(['ls'], stdout=PIPE, stderr=PIPE)
+        MockPopen.assert_called_once_with(['ls'], stdout=PIPE, stderr=PIPE)
 
     @unittest.skipIf(sys.version_info < (3, 5), "This python version doesn't support assert_not_called()")
-    def test_exec_falling_w_rising_set(self):
-        proc, popen = self.setUp_edge(12.5, 11.5, 12.0, target_edge=BatteryHandler.EDGE_RISING)
+    @patch("solar_monitor.hook.battery.subprocess.Popen", autospec=True)
+    def test_exec_falling_w_rising_set(self, MockPopen):
+        class DummyProc(object):
+            pass
 
+        # prepare test environment
+        proc = DummyProc()
+        proc.communicate = MagicMock(return_value=(b'', b''))
+        MockPopen.return_value = proc
+
+        battery = BatteryHandler(cmd='ls', target_edge=BatteryHandler.EDGE_RISING, threshold_voltage=12.0)
+
+        rawdata = {}
+        rawdata['at'] = datetime.now()
+        rawdata['data'] = {'Battery Voltage': {'value': 12.5}}
+        battery.exec(rawdata)
+
+        rawdata['data'] = {'Battery Voltage': {'value': 11.5}}
+        battery.exec(rawdata)
+
+        # verify
         proc.communicate.assert_not_called()
-        popen.assert_not_called()
+        MockPopen.assert_not_called()
 
 
 if __name__ == "__main__":

@@ -4,67 +4,28 @@
 """TS-MPPT-60 monitor application's hook library."""
 
 import subprocess
-from solar_monitor.hook import BaseEventHandler
+from solar_monitor.hook import BaseBatteryEventHandler
 
 
-class BatteryHandler(BaseEventHandler):
+class BatteryHandler(BaseBatteryEventHandler):
     """Event handler class for battery monitoring."""
-    EDGE_NONE = 0
-    EDGE_RISING = 1
-    EDGE_FALLING = 2
 
-    def __init__(self, log_file_path=None, debug=False, cmd=None,
-                 target_edge=EDGE_FALLING, target_volt=12.0):
-        """Initialize instance object.
+    def __init__(self, **kwargs):
+        """Initialize instance of BatteryHandler class. The arguments are same as the parent class BaseBatteryEventHandler.
 
         Args:
+            log_file_path: path to output log data
+            debug: debug log is output if True
+            q_max: max queue number
+            cmd: command to execute when the specified event is triggered
+            target_edge: folling or rising edge if specified
+            threshold_voltage: the threshold of voltage to judge the event is triggered
         Returns:
+            Instance object
         """
-        BaseEventHandler.__init__(self, log_file_path, debug)
+        BaseBatteryEventHandler.__init__(self, **kwargs)
 
-        self._cmd = cmd
-        self._target_volt = target_volt
-        self._target_edge = target_edge
-        self.__pre_battery_volt = None
-
-    def _is_battery_edge_condition(
-            self, cur_volt, prev_volt, target_volt, target_edge):
-        """ Check if the condition of target.
-
-        Keyword arguments:
-            cur_volt: current voltage of battery
-            target_volt: target (threshold) voltage of battery
-            target_edge: falling or rising target_edge
-
-        Returns: True if condition is matched
-        """
-        if prev_volt is None:
-            return False
-
-        if cur_volt < prev_volt:
-            cur_edge = self.EDGE_FALLING
-        elif cur_volt > prev_volt:
-            cur_edge = self.EDGE_RISING
-        else:
-            cur_edge = self.EDGE_NONE
-
-        self.logger.debug("cur_volt: " + str(cur_volt))
-        self.logger.debug("prev_volt: " + str(prev_volt))
-        self.logger.debug("cur_edge: " + str(cur_edge))
-        self.logger.debug("target_edge: " + str(target_edge))
-
-        condition = False
-
-        if target_edge is self.EDGE_RISING:
-            if cur_edge is self.EDGE_RISING:
-                if cur_volt > target_volt:
-                    condition = True
-        elif target_edge is self.EDGE_FALLING:
-            if cur_edge is self.EDGE_FALLING:
-                if cur_volt < target_volt:
-                    condition = True
-
-        return condition
+        self._pre_battery_volt = None
 
     def exec(self, rawdata):
         """Hook battery charge and run some command according to it.
@@ -82,15 +43,13 @@ class BatteryHandler(BaseEventHandler):
         self.logger.debug(
             "got data for battery monitor at {}".format(rawdata["at"]))
 
-        if self.__pre_battery_volt is None:
-            self.__pre_battery_volt = current_battery_volt
+        if self._pre_battery_volt is None:
+            self._pre_battery_volt = current_battery_volt
 
-        if self._is_battery_edge_condition(
+        if self.is_battery_event_triggered(
                 current_battery_volt,
-                self.__pre_battery_volt,
-                self._target_volt,
-                self._target_edge) is False:
-            self.__pre_battery_volt = current_battery_volt
+                self._pre_battery_volt) is False:
+            self._pre_battery_volt = current_battery_volt
             return
 
         if self._cmd is None:
