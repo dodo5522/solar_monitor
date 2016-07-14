@@ -17,7 +17,7 @@
 
 import logging
 
-LOGGER = logging.getLogger("solar_monitor")
+_LOGGER = logging.getLogger("solar_monitor")
 
 
 def configure(
@@ -39,15 +39,15 @@ def configure(
     formatter = logging.Formatter(fmt=log_format, datefmt=date_format)
 
     handler.setFormatter(formatter)
-    LOGGER.addHandler(handler)
+    _LOGGER.addHandler(handler)
 
     if path_file:
         handler = logging.FileHandler(path_file, mode="a")
         handler.setFormatter(formatter)
-        LOGGER.addHandler(handler)
+        _LOGGER.addHandler(handler)
 
     # to print message with all level if debug is True.
-    LOGGER.setLevel(logging.NOTSET if is_debug else logging.WARNING)
+    _LOGGER.setLevel(logging.NOTSET if is_debug else logging.WARNING)
 
 
 def debug(message):
@@ -57,7 +57,7 @@ def debug(message):
     Args:
         message: String of message to print.
     """
-    LOGGER.debug(message)
+    _LOGGER.debug(message)
 
 
 def info(message):
@@ -67,7 +67,7 @@ def info(message):
     Args:
         message: String of message to print.
     """
-    LOGGER.debug(message)
+    _LOGGER.debug(message)
 
 
 def warning(message):
@@ -77,7 +77,7 @@ def warning(message):
     Args:
         message: String of message to print.
     """
-    LOGGER.debug(message)
+    _LOGGER.debug(message)
 
 
 def error(message):
@@ -87,7 +87,7 @@ def error(message):
     Args:
         message: String of message to print.
     """
-    LOGGER.debug(message)
+    _LOGGER.debug(message)
 
 
 def critical(message):
@@ -97,4 +97,4 @@ def critical(message):
     Args:
         message: String of message to print.
     """
-    LOGGER.debug(message)
+    _LOGGER.debug(message)
