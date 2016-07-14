@@ -20,7 +20,7 @@ from solar_monitor import logger
 from solar_monitor.cloud.base import AbstractCloudServiceDriver
 
 
-class KeenIoService(AbstractCloudServiceDriver):
+class KeenIoServiceDriver(AbstractCloudServiceDriver):
     """ Provide accesor class to KeenIo cloud service.
 
     Args:
@@ -33,7 +33,7 @@ class KeenIoService(AbstractCloudServiceDriver):
     def __init__(self, project_id=None, write_key=None):
         AbstractCloudServiceDriver(access_key=write_key, service_id=project_id)
 
-    def _get_service(self, access_key, service_id):
+    def _get_client(self, access_key, service_id):
         """ Get the cloud service instance. Child class must implement this
             method to return the cloud service object of the purpose.
 
@@ -65,4 +65,4 @@ class KeenIoService(AbstractCloudServiceDriver):
             data_for_keenio["keen"] = {"timestamp": at.isoformat() + "Z"}
             datalist_keenio.append(data_for_keenio)
 
-        self.client.add_events({"offgrid": datalist_keenio})
+        self.client_.add_events({"offgrid": datalist_keenio})

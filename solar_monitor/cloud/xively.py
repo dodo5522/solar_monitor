@@ -22,7 +22,7 @@ from solar_monitor import logger
 from solar_monitor.cloud.base import AbstractCloudServiceDriver
 
 
-class XivelyService(AbstractCloudServiceDriver):
+class XivelyServiceDriver(AbstractCloudServiceDriver):
     """ Provide accesor class to Xively cloud service.
 
     Args:
@@ -35,7 +35,7 @@ class XivelyService(AbstractCloudServiceDriver):
     def __init__(self, api_key=None, feed_key=None):
         AbstractCloudServiceDriver(access_key=api_key, service_id=feed_key)
 
-    def _get_service(self, access_key, service_id):
+    def _get_client(self, access_key, service_id):
         """ Get the cloud service instance. Child class must implement this
             method to return the cloud service object of the purpose.
 
@@ -68,5 +68,5 @@ class XivelyService(AbstractCloudServiceDriver):
                 )
             )
 
-        self.service_.datastreams = datastreams
-        self.service_.update()
+        self.client_.datastreams = datastreams
+        self.client_.update()

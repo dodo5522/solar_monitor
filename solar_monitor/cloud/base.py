@@ -38,9 +38,9 @@ class AbstractCloudServiceDriver(object):
     """
 
     def __init__(self, access_key=None, service_id=None):
-        self.service_ = self._get_service(access_key, service_id)
+        self.client_ = self._get_client(access_key, service_id)
 
-    def _get_service(self, access_key, service_id):
+    def _get_client(self, access_key, service_id):
         """ Get the cloud service instance. Child class must implement this
             method to return the cloud service object of the purpose.
 
