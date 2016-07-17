@@ -12,6 +12,9 @@ python:
 install:
   - pip install .
   - pip install -r requirements.txt -r test-requirements.txt
+branches:
+    only:
+    - master
 before_script:
 #  - flake8 --ignore=E501,W601,D203,D105 tsmppt60_driver
 script:
