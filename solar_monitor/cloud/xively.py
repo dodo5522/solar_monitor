@@ -68,5 +68,5 @@ class XivelyServiceDriver(AbstractCloudServiceDriver):
                 )
             )
 
-        self.client_.datastreams = datastreams
-        self.client_.update()
+        self._get_client().datastreams = datastreams
+        self._get_client().update()

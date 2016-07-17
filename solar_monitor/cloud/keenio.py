@@ -65,4 +65,4 @@ class KeenIoServiceDriver(AbstractCloudServiceDriver):
             data_for_keenio["keen"] = {"timestamp": at.isoformat() + "Z"}
             datalist_keenio.append(data_for_keenio)
 
-        self.client_.add_events({"offgrid": datalist_keenio})
+        self._get_client().add_events({"offgrid": datalist_keenio})
