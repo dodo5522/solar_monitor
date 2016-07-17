@@ -15,6 +15,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import sys
 import time
 import argparse
 import datetime
@@ -231,8 +232,12 @@ def main():
         timer.start()
         while True:
             time.sleep(10)
-    except Exception as e:
-        logger.debug(str(e))
+    except KeyboardInterrupt:
+        logger.debug("monitor program will be killed by user.")
+    except:
+        e = sys.exc_info()
+        logger.debug("Another exception: " + str(e[0]) + " is raised.")
+        raise
     finally:
         timer.cancel()
         for trigger in EVENT_TRIGGERS:
