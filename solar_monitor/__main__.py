@@ -140,10 +140,10 @@ def init_events(**kwargs):
 #            api_key=kwargs[""],
 #            some_id=kwargs[""])
 #
-#        bat_low_trigger.append_handler(h)
-#        bat_ful_trigger.append_handler(h)
-#        panel_tmp_hi_trigger.append_handler(h)
-#        panel_tmp_lo_trigger.append_handler(h)
+#        bat_low_trigger.append(h)
+#        bat_ful_trigger.append(h)
+#        panel_tmp_hi_trigger.append(h)
+#        panel_tmp_lo_trigger.append(h)
 
     if kwargs["battery_monitor_enabled"]:
         from solar_monitor.event.handler import SystemHaltEventHandler
@@ -153,7 +153,7 @@ def init_events(**kwargs):
             target_edge=SystemHaltEventHandler.EDGE_FALLING,
             threshold_voltage=kwargs["battery_limit"])
 
-        bat_low_trigger.append_handler(h)
+        bat_low_trigger.append(h)
 
     if kwargs["keenio_project_id"] and kwargs["keenio_write_key"]:
         from solar_monitor.event.handler import KeenIoEventHandler
@@ -162,7 +162,7 @@ def init_events(**kwargs):
             project_id=kwargs["keenio_project_id"],
             write_key=kwargs["keenio_write_key"])
 
-        data_updated_trigger.append_handler(h)
+        data_updated_trigger.append(h)
 
     if kwargs["xively_api_key"] and kwargs["xively_feed_key"]:
         from solar_monitor.event.handler import XivelyEventHandler
@@ -171,7 +171,7 @@ def init_events(**kwargs):
             api_key=kwargs["xively_api_key"],
             feed_key=kwargs["xively_feed_key"])
 
-        data_updated_trigger.append_handler(h)
+        data_updated_trigger.append(h)
 
 
 def event_loop(**kwargs):
