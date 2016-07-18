@@ -150,9 +150,7 @@ def init_events(**kwargs):
         from solar_monitor.event.handler import SystemHaltEventHandler
 
         h = SystemHaltEventHandler(
-            cmd=kwargs["battery_limit_hook_script"],
-            target_edge=SystemHaltEventHandler.EDGE_FALLING,
-            threshold_voltage=kwargs["battery_limit"])
+            cmd=kwargs["battery_limit_hook_script"])
 
         bat_low_trigger.append(h)
 

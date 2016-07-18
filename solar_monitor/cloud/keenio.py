@@ -17,10 +17,10 @@
 
 from keen.client import KeenClient
 from solar_monitor import logger
-from solar_monitor.cloud.base import AbstractCloudServiceDriver
+from solar_monitor.cloud.base import ICloudServiceDriver
 
 
-class KeenIoServiceDriver(AbstractCloudServiceDriver):
+class KeenIoServiceDriver(ICloudServiceDriver):
     """ Provide accesor class to KeenIo cloud service.
 
     Args:
@@ -31,7 +31,7 @@ class KeenIoServiceDriver(AbstractCloudServiceDriver):
     """
 
     def __init__(self, project_id=None, write_key=None):
-        AbstractCloudServiceDriver(access_key=write_key, service_id=project_id)
+        ICloudServiceDriver(access_key=write_key, service_id=project_id)
 
     def _get_client(self, access_key, service_id):
         """ Get the cloud service instance. Child class must implement this

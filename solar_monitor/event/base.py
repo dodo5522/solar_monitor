@@ -186,6 +186,10 @@ Args:
     def __init__(self, q_max=5):
         IEvent.__init__(self, run_in_condition=self._run, q_max=q_max)
 
-    def _run(self):
-        """ Procedure to run when data received from tritter thread. """
+    def _run(self, data):
+        """ Procedure to run when data received from trigger thread.
+
+        Args:
+            data: Pass to the registered event handlers.
+        """
         raise NotImplementedError
