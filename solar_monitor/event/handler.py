@@ -17,8 +17,8 @@
 
 import subprocess
 from solar_monitor import logger
-from solar_monitor.cloud import KeenIoDriver
-from solar_monitor.cloud import XivelyDriver
+from solar_monitor.cloud.keenio import KeenIoCloudService
+from solar_monitor.cloud.xively import XivelyCloudService
 from solar_monitor.event.base import IEventHandler
 
 
@@ -52,7 +52,7 @@ class KeenIoEventHandler(IEventHandler):
     """  """
 
     def __init__(self, project_id, write_key):
-        self.driver_ = KeenIoDriver(
+        self.driver_ = KeenIoCloudService(
             project_id=project_id,
             write_key=write_key)
 
@@ -69,7 +69,7 @@ class XivelyEventHandler(IEventHandler):
     """  """
 
     def __init__(self, api_key, feed_key):
-        self.driver_ = XivelyDriver(
+        self.driver_ = XivelyCloudService(
             api_key=api_key, feed_key=feed_key)
 
     def _run(self, data):

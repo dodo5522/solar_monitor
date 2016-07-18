@@ -17,10 +17,10 @@
 
 from keen.client import KeenClient
 from solar_monitor import logger
-from solar_monitor.cloud.base import ICloudServiceDriver
+from solar_monitor.cloud.base import ICloudService
 
 
-class KeenIoServiceDriver(ICloudServiceDriver):
+class KeenIoCloudService(ICloudService):
     """ Provide accesor class to KeenIo cloud service.
 
     Args:
@@ -31,25 +31,12 @@ class KeenIoServiceDriver(ICloudServiceDriver):
     """
 
     def __init__(self, project_id=None, write_key=None):
-        ICloudServiceDriver(access_key=write_key, service_id=project_id)
-
-    def _get_client(self, access_key, service_id):
-        """ Get the cloud service instance. Child class must implement this
-            method to return the cloud service object of the purpose.
-
-        Args:
-            access_key: Key string to access the cloud service.
-            service_id: ID string to identify the project or something defined on
-                the cloud service. (ex. project ID on KeenIo)
-        Returns:
-            Instance object of cloud service object.
-        """
-        return KeenClient(
-            project_id=service_id,
-            write_key=access_key)
+        self.client_ = KeenClient(
+            project_id=project_id,
+            write_key=write_key)
 
     def get_data_from_server(self):
-        pass
+        return None
 
     def set_data_to_server(self, rawdata):
         data_source = rawdata["source"]
@@ -65,4 +52,4 @@ class KeenIoServiceDriver(ICloudServiceDriver):
             data_for_keenio["keen"] = {"timestamp": at.isoformat() + "Z"}
             datalist_keenio.append(data_for_keenio)
 
-        self._get_client().add_events({"offgrid": datalist_keenio})
+        self.client_.add_events({"offgrid": datalist_keenio})

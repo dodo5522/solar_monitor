@@ -19,10 +19,10 @@
 
 import xively
 from solar_monitor import logger
-from solar_monitor.cloud.base import ICloudServiceDriver
+from solar_monitor.cloud.base import ICloudService
 
 
-class XivelyServiceDriver(ICloudServiceDriver):
+class XivelyCloudService(ICloudService):
     """ Provide accesor class to Xively cloud service.
 
     Args:
@@ -33,24 +33,11 @@ class XivelyServiceDriver(ICloudServiceDriver):
     """
 
     def __init__(self, api_key=None, feed_key=None):
-        ICloudServiceDriver(access_key=api_key, service_id=feed_key)
-
-    def _get_client(self, access_key, service_id):
-        """ Get the cloud service instance. Child class must implement this
-            method to return the cloud service object of the purpose.
-
-        Args:
-            access_key: Key string to access the cloud service.
-            service_id: ID string to identify the project or something defined on
-                the cloud service. (ex. project ID on KeenIo)
-        Returns:
-            Instance object of cloud service object.
-        """
-        api = xively.XivelyAPIClient(access_key)
-        return api.feeds.get(service_id)
+        api = xively.XivelyAPIClient(api_key)
+        self.client_ = api.feeds.get(feed_key)
 
     def get_data_from_server(self):
-        pass
+        return None
 
     def set_data_to_server(self, rawdata):
         data_source = rawdata["data"]
@@ -68,5 +55,5 @@ class XivelyServiceDriver(ICloudServiceDriver):
                 )
             )
 
-        self._get_client().datastreams = datastreams
-        self._get_client().update()
+        self.client_.datastreams = datastreams
+        self.client_.update()

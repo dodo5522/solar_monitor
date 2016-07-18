@@ -27,6 +27,10 @@ from solar_monitor.event.trigger import BatteryLowTrigger
 # from solar_monitor.event.trigger import BatteryFullTrigger
 # from solar_monitor.event.trigger import PanelTempHighTrigger
 # from solar_monitor.event.trigger import PanelTempLowTrigger
+from solar_monitor.event.handler import SystemHaltEventHandler
+from solar_monitor.event.handler import KeenIoEventHandler
+from solar_monitor.event.handler import XivelyEventHandler
+
 
 EVENT_TRIGGERS = []
 CHARGE_CONTROLLER = tsmppt60_driver
@@ -127,7 +131,10 @@ def init_events(**kwargs):
         None
     """
     data_updated_trigger = DataIsUpdatedTrigger()
-    bat_low_trigger = BatteryLowTrigger(voltage=kwargs["battery_limit"])
+
+    if kwargs["battery_limit"]:
+        bat_low_trigger = BatteryLowTrigger(lowest_voltage=kwargs["battery_limit"])
+
 # FIXME: Implement twittter bot
 #    bat_ful_trigger = BatteryFullTrigger(voltage=26.0)
 #    panel_tmp_hi_trigger = PanelTempHighTrigger(temp=50.0)
@@ -147,16 +154,12 @@ def init_events(**kwargs):
 #        panel_tmp_lo_trigger.append(h)
 
     if kwargs["battery_monitor_enabled"]:
-        from solar_monitor.event.handler import SystemHaltEventHandler
-
         h = SystemHaltEventHandler(
             cmd=kwargs["battery_limit_hook_script"])
 
         bat_low_trigger.append(h)
 
     if kwargs["keenio_project_id"] and kwargs["keenio_write_key"]:
-        from solar_monitor.event.handler import KeenIoEventHandler
-
         h = KeenIoEventHandler(
             project_id=kwargs["keenio_project_id"],
             write_key=kwargs["keenio_write_key"])
@@ -164,8 +167,6 @@ def init_events(**kwargs):
         data_updated_trigger.append(h)
 
     if kwargs["xively_api_key"] and kwargs["xively_feed_key"]:
-        from solar_monitor.event.handler import XivelyEventHandler
-
         h = XivelyEventHandler(
             api_key=kwargs["xively_api_key"],
             feed_key=kwargs["xively_feed_key"])

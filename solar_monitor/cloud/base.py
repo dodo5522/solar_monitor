@@ -26,32 +26,8 @@ AbstractCloudServiceDriver
 """
 
 
-class AbstractCloudServiceDriver(object):
-    """ Abstract class of cloud service.
-
-    Args:
-        access_key: Key string to access the cloud service.
-        service_id: ID string to identify the project or something defined on
-            the cloud service. (ex. project ID on KeenIo)
-    Returns:
-        Instance object of cloud service driver.
-    """
-
-    def __init__(self, access_key=None, service_id=None):
-        self.client_ = self._get_client(access_key, service_id)
-
-    def _get_client(self, access_key, service_id):
-        """ Get the cloud service instance. Child class must implement this
-            method to return the cloud service object of the purpose.
-
-        Args:
-            access_key: Key string to access the cloud service.
-            service_id: ID string to identify the project or something defined on
-                the cloud service. (ex. project ID on KeenIo)
-        Returns:
-            Instance object of cloud service object.
-        """
-        raise NotImplementedError
+class ICloudService(object):
+    """ Interface class for cloud service. """
 
     def get_data_from_server(self):
         raise NotImplementedError
