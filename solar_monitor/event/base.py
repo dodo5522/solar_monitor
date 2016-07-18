@@ -142,6 +142,9 @@ class IEventTrigger(IEvent):
                         q_max=q_max)
         self.event_handlers_ = []
 
+    def __len__(self):
+        return len(self.event_handlers_)
+
     def _is_condition(self, data):
         """ Trigger condition is matched or not. This method should be
             implented in inherited class.

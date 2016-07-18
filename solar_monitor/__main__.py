@@ -122,8 +122,8 @@ def init_args():
     return arg.parse_args()
 
 
-def init_events(**kwargs):
-    """ Initialize event triggers and handlers.
+def start_event_triggers(**kwargs):
+    """ Initialize and start event trigger/handler.
 
     Keyword Args:
         kwargs: see init_args() function to know what option is there.
@@ -170,8 +170,25 @@ def init_events(**kwargs):
         h = XivelyEventHandler(
             api_key=kwargs["xively_api_key"],
             feed_key=kwargs["xively_feed_key"])
-
         data_updated_trigger.append(h)
+
+    if "bat_low_trigger" in locals():
+        EVENT_TRIGGERS.append(bat_low_trigger)
+    if "data_updated_trigger" in locals():
+        EVENT_TRIGGERS.append(data_updated_trigger)
+
+    for trigger in EVENT_TRIGGERS:
+        trigger.start()
+
+
+def stop_event_triggers():
+    """ Stop event trigger/handler. """
+
+    for trigger in EVENT_TRIGGERS:
+        trigger.stop()
+
+    for trigger in EVENT_TRIGGERS:
+        trigger.join()
 
 
 def event_loop(**kwargs):
@@ -218,10 +235,7 @@ def main():
         event_loop(**kwargs)
         return
 
-    init_events(**kwargs)
-
-    for trigger in EVENT_TRIGGERS:
-        trigger.start()
+    start_event_triggers(**kwargs)
 
     kwargs = {}
     kwargs["host_name"] = args.host_name
@@ -240,7 +254,6 @@ def main():
         raise
     finally:
         timer.cancel()
-        for trigger in EVENT_TRIGGERS:
-            trigger.join()
+        stop_event_triggers()
 
 main()
