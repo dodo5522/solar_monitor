@@ -47,7 +47,7 @@ def configure(
         _LOGGER.addHandler(handler)
 
     # to print message with all level if debug is True.
-    _LOGGER.setLevel(logging.NOTSET if is_debug else logging.WARNING)
+    _LOGGER.setLevel(logging.DEBUG if is_debug else logging.INFO)
 
 
 def debug(message):

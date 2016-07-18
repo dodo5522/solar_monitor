@@ -209,13 +209,14 @@ def event_loop(**kwargs):
 
 def main():
     args = init_args()
+    kwargs = dict(args._get_kwargs())
+
     logger.configure(path_file=args.log_file, is_debug=args.debug)
 
     if args.just_get_status:
-        event_loop()
+        event_loop(**kwargs)
         return
 
-    kwargs = dict(args._get_kwargs())
     init_events(**kwargs)
 
     for trigger in EVENT_TRIGGERS:
