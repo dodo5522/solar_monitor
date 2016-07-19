@@ -148,6 +148,12 @@ class IEventTrigger(IEventListener):
     def __len__(self):
         return len(self.event_handlers_)
 
+    def __iter__(self):
+        raise NotImplementedError
+
+    def next(self):
+        raise NotImplementedError
+
     def _is_condition(self, data):
         """ Trigger condition is matched or not. This method should be
             implented in inherited class.
