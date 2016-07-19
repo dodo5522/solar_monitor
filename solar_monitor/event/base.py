@@ -95,7 +95,7 @@ class IEventListener(object):
             self.run_in_condition_(got_data)
 
     def start(self):
-        """ Start the thread of event trigger loop.
+        """ Start the thread of event loop.
 
         Exception:
             RuntimeError: Raises if starting this thread twice.
@@ -103,8 +103,8 @@ class IEventListener(object):
         self.thread_.start()
 
     def stop(self):
-        """ Stop the thread of event trigger loop. Need to call join() method
-            to terminate this thread completely.
+        """ Stop the thread of event loop. Need to call join() method to
+            terminate this thread completely.
         """
         self.q_.put(None, timeout=5)
 
@@ -179,6 +179,39 @@ class IEventTrigger(IEventListener):
             event_handler: Event handler object.
         """
         self.event_handlers_.append(event_handler)
+
+    def start(self):
+        """ Start the thread of event trigger thread and registered event handlers.
+
+        Exception:
+            RuntimeError: Raises if starting this thread twice.
+        """
+
+        for handler in self.event_handlers_:
+            handler.start()
+
+        # start trigger event loop thread
+        super(IEventTrigger, self).start()
+
+    def stop(self):
+        """ Stop the thread of event trigger loop. Need to call join() method
+            to terminate this thread completely.
+        """
+
+        for handler in self.event_handlers_:
+            handler.stop()
+
+        # stop trigger event loop thread
+        super(IEventTrigger, self).stop()
+
+    def join(self):
+        """ Wait and block until this thread is teminated completely. """
+
+        for handler in self.event_handlers_:
+            handler.join()
+
+        # wait for joining trigger event loop thread
+        super(IEventHandler, self).join()
 
 
 class IEventHandler(IEventListener):
