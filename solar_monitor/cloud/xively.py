@@ -43,8 +43,6 @@ class XivelyCloudService(ICloudService):
         data_source = rawdata["data"]
         at = rawdata["at"]
 
-        logger.debug("send data to keenio at {}".format(at))
-
         datastreams = []
         for key, data in data_source.items():
             datastreams.append(
@@ -57,3 +55,6 @@ class XivelyCloudService(ICloudService):
 
         self.client_.datastreams = datastreams
         self.client_.update()
+
+        logger.debug("{} sent data to xively at {}".format(
+            type(self).__name__, at))

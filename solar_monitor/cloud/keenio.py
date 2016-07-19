@@ -42,8 +42,6 @@ class KeenIoCloudService(ICloudService):
         data_source = rawdata["source"]
         at = rawdata["at"]
 
-        logger.debug("send data to keenio at {}".format(at))
-
         datalist_keenio = []
         for monitoring_item, at in rawdata["data"].items():
             data_for_keenio = at
@@ -53,3 +51,6 @@ class KeenIoCloudService(ICloudService):
             datalist_keenio.append(data_for_keenio)
 
         self.client_.add_events({"offgrid": datalist_keenio})
+
+        logger.debug("{} sent data to keenio at {}".format(
+            type(self).__name__, at))

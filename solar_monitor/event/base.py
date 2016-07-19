@@ -43,6 +43,7 @@ have TweetEventHandler and SystemHaltEventHandler objects.
 
 from queue import Queue
 from threading import Thread
+from solar_monitor import logger
 
 
 class IEventListener(object):
@@ -81,6 +82,8 @@ class IEventListener(object):
 
             got_data = self.q_.get()
             self.q_.task_done()
+
+            logger.debug("{} got data from queue.".format(type(self).__name__))
 
             if got_data is None:
                 break

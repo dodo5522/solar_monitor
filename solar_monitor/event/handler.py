@@ -64,6 +64,7 @@ class KeenIoEventHandler(IEventHandler):
             data: Pass to the registered event handlers.
         """
         self.driver_.set_data_to_server(data)
+        logger.info("{} sent data to cloud server.".format(type(self).__name__))
 
 
 class XivelyEventHandler(IEventHandler):
@@ -81,3 +82,4 @@ class XivelyEventHandler(IEventHandler):
             data: Pass to the registered event handlers.
         """
         self.driver_.set_data_to_server(data)
+        logger.info("{} sent data to cloud server.".format(type(self).__name__))
