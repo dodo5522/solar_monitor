@@ -232,7 +232,9 @@ Args:
     """
 
     def __init__(self, q_max=5):
-        IEventListener.__init__(self, run_in_condition=self._run, q_max=q_max)
+        IEventListener.__init__(
+            self, is_condition=lambda x: True,
+            run_in_condition=self._run, q_max=q_max)
 
     def _run(self, data):
         """ Procedure to run when data received from trigger thread.
