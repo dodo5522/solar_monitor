@@ -51,7 +51,8 @@ class SystemHaltEventHandler(IEventHandler):
 class KeenIoEventHandler(IEventHandler):
     """  """
 
-    def __init__(self, project_id, write_key):
+    def __init__(self, project_id, write_key, q_max=5):
+        IEventHandler.__init__(self, q_max=q_max)
         self.driver_ = KeenIoCloudService(
             project_id=project_id,
             write_key=write_key)
@@ -68,7 +69,8 @@ class KeenIoEventHandler(IEventHandler):
 class XivelyEventHandler(IEventHandler):
     """  """
 
-    def __init__(self, api_key, feed_key):
+    def __init__(self, api_key, feed_key, q_max=5):
+        IEventHandler.__init__(self, q_max=q_max)
         self.driver_ = XivelyCloudService(
             api_key=api_key, feed_key=feed_key)
 
