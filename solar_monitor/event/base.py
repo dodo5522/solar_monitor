@@ -20,7 +20,7 @@ Base event class definition especially for trigger/handler. The inheritance
 tree structure is like below. These event handler class objects work with
 threading by the data or configuration set when initialized.
 
-IEvent
+IEventListener
    |- IEventTrigger
    |    |- DataIsUpdatedTrigger     : Catch the timing of any data updated.
    |    |- BatteryLowTrigger        : Catch the timing of low battery voltage.
@@ -45,7 +45,7 @@ from queue import Queue
 from threading import Thread
 
 
-class IEvent(object):
+class IEventListener(object):
     """ Base class to handle some event ex. trigger/handler.
 
     Args:
@@ -127,7 +127,7 @@ class IEvent(object):
         self.q_.join()
 
 
-class IEventTrigger(IEvent):
+class IEventTrigger(IEventListener):
     """ Event trigger class. Must implement _is_condition() and
         _run_in_condition() method.
 
@@ -138,9 +138,11 @@ class IEventTrigger(IEvent):
     """
 
     def __init__(self, q_max=5):
-        IEvent.__init__(self, is_condition=self._is_condition,
-                        run_in_condition=self._run_in_condition,
-                        q_max=q_max)
+        IEventListener.__init__(
+            self, is_condition=self._is_condition,
+            run_in_condition=self._run_in_condition,
+            q_max=q_max)
+
         self.event_handlers_ = []
 
     def __len__(self):
@@ -179,7 +181,7 @@ class IEventTrigger(IEvent):
         self.event_handlers_.append(event_handler)
 
 
-class IEventHandler(IEvent):
+class IEventHandler(IEventListener):
     """ Event handler class. Must implement _run() method.
 Args:
         q_max: max queue number
@@ -188,7 +190,7 @@ Args:
     """
 
     def __init__(self, q_max=5):
-        IEvent.__init__(self, run_in_condition=self._run, q_max=q_max)
+        IEventListener.__init__(self, run_in_condition=self._run, q_max=q_max)
 
     def _run(self, data):
         """ Procedure to run when data received from trigger thread.
