@@ -89,7 +89,7 @@ class IEvent(object):
                 continue
             if not hasattr(self.is_condition_, "__call__"):
                 continue
-            if not self.is_condition_():
+            if not self.is_condition_(got_data):
                 continue
 
             self.run_in_condition_(got_data)
