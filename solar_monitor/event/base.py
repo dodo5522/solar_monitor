@@ -60,7 +60,8 @@ class IEvent(object):
     """
 
     def __init__(self, is_condition=None, run_in_condition=None, q_max=5):
-        self.thread_ = Thread(target=self._thread_main, args=())
+        self.thread_ = Thread(
+            target=self._thread_main, name=type(self).__name__, args=())
         self.q_ = Queue(q_max)
         self.is_condition_ = is_condition
         self.run_in_condition_ = run_in_condition
