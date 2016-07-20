@@ -220,7 +220,7 @@ class IEventTrigger(IEventListener):
             handler.join()
 
         # wait for joining trigger event loop thread
-        super(IEventHandler, self).join()
+        super(IEventTrigger, self).join()
 
 
 class IEventHandler(IEventListener):
