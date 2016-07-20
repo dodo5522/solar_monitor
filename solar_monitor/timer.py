@@ -1,13 +1,32 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
+#   Copyright 2016 Takashi Ando - http://blog.rinka-blossom.com/
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
 """TS-MPPT-60 timer library module."""
 
 import threading
 import time
 
+from solar_monitor import logger
 from datetime import datetime
-from tsmppt60_driver.base import Logger
+
+
+class NotStartedYetError(Exception):
+    """Exception if timer is canceled even though it's not started yet."""
+    pass
 
 
 class AlreadyRunningError(Exception):
@@ -15,14 +34,13 @@ class AlreadyRunningError(Exception):
     pass
 
 
-class RecursiveTimer(Logger):
+class RecursiveTimer(object):
     """Class of timer for recursively running function.
 
     Keyword arguments:
         interval: interval time as second
         target_func: callable object to run by timer event.
                      this function should have keyword arguments but NOT arguments.
-        log_file_path: file path of log file to output
         debug: enable debug mode if True
         kwargs: object to be passed to the specified target_func
 
@@ -30,9 +48,7 @@ class RecursiveTimer(Logger):
         timer object
     """
 
-    def __init__(self, interval, target_func, log_file_path=None, debug=False, **target_kwargs):
-        Logger.__init__(self, log_file_path, debug)
-
+    def __init__(self, interval, target_func, **target_kwargs):
         self.interval = interval
         self.target_func = target_func
         self.target_kwargs = target_kwargs
@@ -96,7 +112,7 @@ class RecursiveTimer(Logger):
             try:
                 self.target_func(**self.target_kwargs)
             except Exception as e:
-                self.logger.debug(str(e) + ' error!!!')
+                logger.debug(str(e) + ' error!!!')
 
     def start(self):
         """Start the timer thread.
@@ -106,7 +122,7 @@ class RecursiveTimer(Logger):
         Returns:
             None
         Raises:
-            timer.AlreadyRunningErorr if timer already started.
+            timer.AlreadyRunningError if timer already started.
         """
         if not self.thread_timer.isAlive():
             self.event_stop_timer.clear()
@@ -121,10 +137,14 @@ class RecursiveTimer(Logger):
             None
         Returns:
             None
+        Raises:
+            timer.NotStartedYetError if timer is canceled even though it's not started yet.
         """
         if self.thread_timer.isAlive():
             self.event_stop_timer.set()
             self.thread_timer.join()
+        else:
+            raise NotStartedYetError("timer is not running")
 
     def is_alive(self):
         """Test if the timer thread is alive.

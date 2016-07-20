@@ -14,3 +14,23 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+
+"""
+Cloud service driver class definition. The inheritance tree structure is like
+below. These event handler class objects work with threading by the data or
+configuration set when initialized.
+
+AbstractCloudServiceDriver
+    |- KeenIoCloudServiceDriver : for KeenIO
+    `- XivelyCloudServiceDriver : for Xively
+"""
+
+
+class ICloudService(object):
+    """ Interface class for cloud service. """
+
+    def get_data_from_server(self):
+        raise NotImplementedError
+
+    def set_data_to_server(self, rawdata):
+        raise NotImplementedError
