@@ -43,11 +43,11 @@ class KeenIoCloudService(ICloudService):
         at = rawdata["at"]
 
         datalist_keenio = []
-        for monitoring_item, at in rawdata["data"].items():
-            data_for_keenio = at
+        for monitoring_item, item_data in rawdata["data"].items():
+            data_for_keenio = item_data
             data_for_keenio["label"] = monitoring_item
             data_for_keenio["source"] = data_source
-            data_for_keenio["keen"] = {"timestamp": at.isoformat() + "Z"}
+            data_for_keenio["keen"] = {"timestamp": "{}Z".format(at.isoformat())}
             datalist_keenio.append(data_for_keenio)
 
         self.client_.add_events({"offgrid": datalist_keenio})
