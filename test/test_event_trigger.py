@@ -124,7 +124,28 @@ class TestEventListener(unittest.TestCase):
         el.stop()
         el.join()
 
-    def test_is_condition_true(self):
+    def test_run_in_condition_none(self):
+        """ run_in_condition()がNoneの場合に何もしない（例外もraiseしない） """
+        el = IEventListener(is_condition=lambda x: True, run_in_condition=None)
+
+        el.start()
+        el.put_q(1)
+        el.join_q()
+        el.stop()
+        el.join()
+
+    def test_run_in_condition_callable(self):
+        """ run_in_condition()がcallableでない場合に何もしない（例外もraiseしない） """
+        not_callable_obj = []
+        el = IEventListener(is_condition=lambda x: True, run_in_condition=lambda x: not_callable_obj)
+
+        el.start()
+        el.put_q(1)
+        el.join_q()
+        el.stop()
+        el.join()
+
+    def test_run_in_condition(self):
         """ is_condition()がTrueを返す場合にrun_in_conditionをコールする """
         e = Event()
 
@@ -137,21 +158,6 @@ class TestEventListener(unittest.TestCase):
 
         el.stop()
         el.join()
-
-    @unittest.skip
-    def test_run_in_condition_none(self):
-        """ run_in_condition()がNoneの場合にrun_in_conditionをコールしない """
-        pass
-
-    @unittest.skip
-    def test_run_in_condition_callable(self):
-        """ run_in_condition()がcallableでない場合にrun_in_conditionをコールしない """
-        pass
-
-    @unittest.skip
-    def test_run_in_condition_called(self):
-        """ run_in_condition()がNoneでない且つcallableの場合にrun_in_conditionをコールする """
-        pass
 
 
 class TestEventTrigger(unittest.TestCase):
