@@ -2,12 +2,10 @@
 # -*- coding:utf-8 -*-
 
 import unittest
-from solar_monitor.event.trigger import BatteryLowTrigger
+from solar_monitor.event.base import IEventHandler
 
 
-class TestBatteryLowTrigger(unittest.TestCase):
-    """ 親のEventListenerクラスで実施済みテスト以外をテストする """
-
+class TestIEventHandler(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         pass
@@ -23,9 +21,9 @@ class TestBatteryLowTrigger(unittest.TestCase):
         pass
 
     @unittest.skip
-    def test_append(self):
-        """  """
-        pass
+    def test_temp(self):
+        eh = IEventHandler()
+        eh.start()
 
 
 if __name__ == "__main__":
