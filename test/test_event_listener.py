@@ -96,7 +96,7 @@ class TestEventListener(unittest.TestCase):
     def test_is_condition_not_callable(self):
         """ is_condition()がcallableでない場合にrun_in_conditionをコールしない """
         e = Event()
-        not_callable_obj = []
+        not_callable_obj = [1, ]
 
         el = IEventListener(is_condition=not_callable_obj, run_in_condition=lambda x: e.set())
         el.start()
@@ -134,8 +134,8 @@ class TestEventListener(unittest.TestCase):
 
     def test_run_in_condition_callable(self):
         """ run_in_condition()がcallableでない場合に何もしない（例外もraiseしない） """
-        not_callable_obj = []
-        el = IEventListener(is_condition=lambda x: True, run_in_condition=lambda x: not_callable_obj)
+        not_callable_obj = [1, ]
+        el = IEventListener(is_condition=lambda x: True, run_in_condition=not_callable_obj)
 
         el.start()
         el.put_q(1)
