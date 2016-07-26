@@ -1,8 +1,8 @@
 #!/bin/sh
 ### BEGIN INIT INFO
 # Provides:          solar_monitor
-# Required-Start:    $local_fs
-# Required-Stop:     $local_fs
+# Required-Start:    networking
+# Required-Stop:     networking
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: solar_monitor
@@ -12,7 +12,7 @@ NAME=solar_monitor
 SCRIPTNAME=$0
 CONFIG_FILE=/etc/default/$(basename ${SCRIPTNAME})
 PID_FILE=/var/run/$(basename ${SCRIPTNAME}).pid
-DAEMON=/usr/bin/python3
+DAEMON=/usr/local/bin/solar_monitor
 
 . ${CONFIG_FILE}
 
@@ -20,7 +20,7 @@ DAEMON=/usr/bin/python3
 [ "${BATTERY_MONITOR_ENABLED}" = 'NO' ] || ENABLE_BATTERY_MONITOR='-be'
 [ "${ALL_STATUS_ENABLED}" = 'NO' ] || ENABLE_ALL_STATUS='--get-all-status'
 
-DAEMON_ARGS="-m $(basename ${SCRIPTNAME}) -i ${INTERVAL} -l ${LOG} ${DEBUG_ARGS} ${ENABLE_ALL_STATUS} \
+DAEMON_ARGS="-i ${INTERVAL} -l ${LOG} ${DEBUG_ARGS} ${ENABLE_ALL_STATUS} \
     -xa ${XIVELY_API_KEY} -xf ${XIVELY_FEED_KEY} \
     -kp ${KEENIO_PROJECT_ID} -kw ${KEENIO_WRITE_KEY} \
     -bl ${BATTERY_LIMIT_VOLTAGE} -bs ${BATTERY_LIMIT_HOOK_SCRIPT} ${ENABLE_BATTERY_MONITOR}"
