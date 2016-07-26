@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
+import sys
 import unittest
 import datetime
 from solar_monitor.event.trigger import BatteryLowTrigger
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 
 
 class TestBatteryLowTrigger(unittest.TestCase):
@@ -43,7 +44,10 @@ class TestBatteryLowTrigger(unittest.TestCase):
         batlow_trigger.stop()
         batlow_trigger.join()
 
-        batlow_trigger.run_in_condition_.assert_not_called()
+        if sys.version_info[:2] >= (3, 5):
+            batlow_trigger.run_in_condition_.assert_not_called()
+        else:
+            self.assertFalse(batlow_trigger.run_in_condition_.called)
 
     def test_low_voltage_from_first_time(self):
         """  """
