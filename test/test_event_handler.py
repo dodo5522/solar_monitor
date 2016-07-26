@@ -1,17 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
-import sys
 import unittest
-from datetime import datetime
-from solar_monitor.hook.xively import XivelyHandler
-from unittest.mock import patch
-from unittest.mock import MagicMock
+from solar_monitor.event.base import IEventHandler
 
 
-class TestXivelyHandler(unittest.TestCase):
-    """test XivelyHandler class."""
-
+class TestIEventHandler(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         pass
@@ -25,6 +19,11 @@ class TestXivelyHandler(unittest.TestCase):
 
     def tearDown(self):
         pass
+
+    @unittest.skip
+    def test_temp(self):
+        eh = IEventHandler()
+        eh.start()
 
 
 if __name__ == "__main__":
