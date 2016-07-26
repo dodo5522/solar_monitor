@@ -95,6 +95,15 @@ class IEventListener(object):
             if not self.is_condition_(got_data):
                 continue
 
+            logger.debug("{} is_condition returns true.".format(type(self).__name__))
+
+            if not self.run_in_condition_:
+                continue
+            if not hasattr(self.run_in_condition_, "__call__"):
+                continue
+
+            logger.debug("{} calls run_in_condition.".format(type(self).__name__))
+
             self.run_in_condition_(got_data)
 
     def start(self):
@@ -109,11 +118,21 @@ class IEventListener(object):
         """ Stop the thread of event loop. Need to call join() method to
             terminate this thread completely.
         """
-        self.q_.put(None, timeout=5)
+        self.q_.put(None, timeout=3)
 
-    def join(self):
-        """ Wait and block until this thread is teminated completely. """
-        self.thread_.join(timeout=5)
+    def join(self, timeout=3):
+        """ Wait and block until this thread is teminated completely.
+
+        Args:
+            timeout: Timeout to join as second.
+        Raise:
+            SystemError: If the thread cannot be joined.
+        """
+        self.thread_.join(timeout=timeout)
+
+        if self.thread_.is_alive():
+            raise SystemError("{} cannot join {} thread.".format(
+                type(self).__name__, self.thread_.name))
 
     def put_q(self, data):
         """ Put data to the internal queue which is passed to exec() method.
@@ -121,8 +140,14 @@ class IEventListener(object):
         Args:
             data: data putting to the internal queue
         Raises:
+            ValueError: if data is None
             queue.Full: if timeout is set and queue is full in the time
         """
+
+        if data is None:
+            raise ValueError("{} cannot put {} in queue.".format(
+                type(self).__name__, data))
+
         self.q_.put_nowait(data)
 
     def join_q(self):
@@ -225,8 +250,8 @@ class IEventTrigger(IEventListener):
 
 class IEventHandler(IEventListener):
     """ Event handler class. Must implement _run() method.
-Args:
-        q_max: max queue number
+    Args:
+            q_max: max queue number
     Returns:
         Instance object
     """
