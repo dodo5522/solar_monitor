@@ -54,7 +54,8 @@ class BatteryLowTrigger(IEventTrigger):
 
     def _is_condition(self, data):
         """ Returns True if battery voltage getting low and run over the limit
-            of lowest voltage setting.
+            of lowest voltage setting. _run_in_condition() method run if this
+            method returns True.
 
         Args:
             data: To judge the condition.
@@ -102,7 +103,8 @@ class BatteryFullTrigger(IEventTrigger):
 
     def _is_condition(self, data):
         """ Returns True if battery voltage getting high and run over the limit
-            of highest voltage setting.
+            of highest voltage setting. _run_in_condition() method run if this
+            method returns True.
 
         Args:
             data: To judge the condition.

@@ -184,7 +184,8 @@ class IEventTrigger(IEventListener):
 
     def _is_condition(self, data):
         """ Trigger condition is matched or not. This method should be
-            implented in inherited class.
+            implented in inherited class. _run_in_condition() method run if
+            this method returns True.
 
         Args:
             data: To judge the condition.
