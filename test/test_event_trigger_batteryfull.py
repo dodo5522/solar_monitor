@@ -5,6 +5,8 @@ import sys
 import datetime
 import unittest
 from solar_monitor.event.trigger import BatteryFullTrigger
+from solar_monitor.event.handler import IEventHandler
+from unittest.mock import MagicMock
 
 
 class TestBatteryHandler(unittest.TestCase):
@@ -24,149 +26,94 @@ class TestBatteryHandler(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @unittest.skip
-    def test_exec_none_w_falling_set(self, MockPopen):
-        class DummyProc(object):
-            pass
+    def test_not_in_condition(self):
+        DummyEventHandler = MagicMock(spec=IEventHandler)
 
-        # prepare test environment
-        proc = DummyProc()
-        proc.communicate = MagicMock(return_value=(b'', b''))
-        MockPopen.return_value = proc
+        event_trigger = BatteryFullTrigger(full_voltage=25.0)
+        hoge_handler = DummyEventHandler()
 
-        battery = BatteryFullTrigger(cmd='ls', target_edge=BatteryHandler.EDGE_FALLING, threshold_voltage=12.0)
+        event_trigger.append(hoge_handler)
+        event_trigger.start()
 
-        rawdata = {}
-        rawdata['at'] = datetime.now()
-        rawdata['data'] = {'Battery Voltage': {'value': 12.5}}
-        battery.exec(rawdata)
+        expected_data = {
+            "at": datetime.datetime.now().isoformat(),
+            "data": {
+                "Battery Voltage": {
+                    "value": 24.0
+                }
+            }
+        }
 
-        rawdata['data'] = {'Battery Voltage': {'value': 12.5}}
-        battery.exec(rawdata)
+        event_trigger.put_q(expected_data)
+        event_trigger.join_q()
 
-        # verify
-        proc.communicate.assert_not_called()
-        MockPopen.assert_not_called()
+        event_trigger.stop()
+        event_trigger.join()
 
-    @unittest.skip
-    def test_exec_rising_w_falling_set(self, MockPopen):
-        class DummyProc(object):
-            pass
+        if sys.version_info[:2] >= (3, 5):
+            hoge_handler.put_q.assert_not_called()
+            hoge_handler.join_q.assert_not_called()
+        else:
+            self.assertFalse(hoge_handler.put_q.called)
+            self.assertFalse(hoge_handler.join_q.called)
 
-        # prepare test environment
-        proc = DummyProc()
-        proc.communicate = MagicMock(return_value=(b'', b''))
-        MockPopen.return_value = proc
+    def test_higher_voltage_than_intialized_one(self):
+        DummyEventHandler = MagicMock(spec=IEventHandler)
 
-        battery = BatteryHandler(cmd='ls', target_edge=BatteryHandler.EDGE_FALLING, threshold_voltage=12.0)
+        event_trigger = BatteryFullTrigger(full_voltage=25.0)
+        hoge_handler = DummyEventHandler()
 
-        rawdata = {}
-        rawdata['at'] = datetime.now()
-        rawdata['data'] = {'Battery Voltage': {'value': 12.5}}
-        battery.exec(rawdata)
+        event_trigger.append(hoge_handler)
+        event_trigger.start()
 
-        rawdata['data'] = {'Battery Voltage': {'value': 13.0}}
-        battery.exec(rawdata)
+        expected_data = {
+            "at": datetime.datetime.now().isoformat(),
+            "data": {
+                "Battery Voltage": {
+                    "value": 25.1
+                }
+            }
+        }
 
-        # verify
-        proc.communicate.assert_not_called()
-        MockPopen.assert_not_called()
+        event_trigger.put_q(expected_data)
+        event_trigger.join_q()
 
-    @unittest.skip
-    def test_exec_falling_w_falling_set(self, MockPopen):
-        class DummyProc(object):
-            pass
+        event_trigger.stop()
+        event_trigger.join()
 
-        # prepare test environment
-        proc = DummyProc()
-        proc.communicate = MagicMock(return_value=(b'', b''))
-        MockPopen.return_value = proc
+        self.assertEqual(hoge_handler.put_q.call_args[0][0]["at"], expected_data["at"])
+        self.assertEqual(
+            hoge_handler.put_q.call_args[0][0]["data"]["Battery Voltage"]["value"],
+            expected_data["data"]["Battery Voltage"]["value"])
 
-        battery = BatteryHandler(cmd='ls', target_edge=BatteryHandler.EDGE_FALLING, threshold_voltage=12.0)
+    def test_voltage_equals_intialized_one(self):
+        DummyEventHandler = MagicMock(spec=IEventHandler)
 
-        rawdata = {}
-        rawdata['at'] = datetime.now()
-        rawdata['data'] = {'Battery Voltage': {'value': 12.5}}
-        battery.exec(rawdata)
+        event_trigger = BatteryFullTrigger(full_voltage=25.0)
+        hoge_handler = DummyEventHandler()
 
-        rawdata['data'] = {'Battery Voltage': {'value': 11.5}}
-        battery.exec(rawdata)
+        event_trigger.append(hoge_handler)
+        event_trigger.start()
 
-        # verify
-        proc.communicate.assert_called_once_with()
-        MockPopen.assert_called_once_with(['ls'], stdout=PIPE, stderr=PIPE)
+        expected_data = {
+            "at": datetime.datetime.now().isoformat(),
+            "data": {
+                "Battery Voltage": {
+                    "value": 25.0
+                }
+            }
+        }
 
-    @unittest.skip
-    def test_exec_none_w_rising_set(self, MockPopen):
-        class DummyProc(object):
-            pass
+        event_trigger.put_q(expected_data)
+        event_trigger.join_q()
 
-        # prepare test environment
-        proc = DummyProc()
-        proc.communicate = MagicMock(return_value=(b'', b''))
-        MockPopen.return_value = proc
+        event_trigger.stop()
+        event_trigger.join()
 
-        battery = BatteryHandler(cmd='ls', target_edge=BatteryHandler.EDGE_RISING, threshold_voltage=12.0)
-
-        rawdata = {}
-        rawdata['at'] = datetime.now()
-        rawdata['data'] = {'Battery Voltage': {'value': 12.5}}
-        battery.exec(rawdata)
-
-        rawdata['data'] = {'Battery Voltage': {'value': 12.5}}
-        battery.exec(rawdata)
-
-        # verify
-        proc.communicate.assert_not_called()
-        MockPopen.assert_not_called()
-
-    @unittest.skip
-    def test_exec_rising_w_rising_set(self, MockPopen):
-        class DummyProc(object):
-            pass
-
-        # prepare test environment
-        proc = DummyProc()
-        proc.communicate = MagicMock(return_value=(b'', b''))
-        MockPopen.return_value = proc
-
-        battery = BatteryHandler(cmd='ls', target_edge=BatteryHandler.EDGE_RISING, threshold_voltage=12.0)
-
-        rawdata = {}
-        rawdata['at'] = datetime.now()
-        rawdata['data'] = {'Battery Voltage': {'value': 12.5}}
-        battery.exec(rawdata)
-
-        rawdata['data'] = {'Battery Voltage': {'value': 13.0}}
-        battery.exec(rawdata)
-
-        # verify
-        proc.communicate.assert_called_once_with()
-        MockPopen.assert_called_once_with(['ls'], stdout=PIPE, stderr=PIPE)
-
-    @unittest.skip
-    def test_exec_falling_w_rising_set(self, MockPopen):
-        class DummyProc(object):
-            pass
-
-        # prepare test environment
-        proc = DummyProc()
-        proc.communicate = MagicMock(return_value=(b'', b''))
-        MockPopen.return_value = proc
-
-        battery = BatteryHandler(cmd='ls', target_edge=BatteryHandler.EDGE_RISING, threshold_voltage=12.0)
-
-        rawdata = {}
-        rawdata['at'] = datetime.now()
-        rawdata['data'] = {'Battery Voltage': {'value': 12.5}}
-        battery.exec(rawdata)
-
-        rawdata['data'] = {'Battery Voltage': {'value': 11.5}}
-        battery.exec(rawdata)
-
-        # verify
-        proc.communicate.assert_not_called()
-        MockPopen.assert_not_called()
+        self.assertEqual(hoge_handler.put_q.call_args[0][0]["at"], expected_data["at"])
+        self.assertEqual(
+            hoge_handler.put_q.call_args[0][0]["data"]["Battery Voltage"]["value"],
+            expected_data["data"]["Battery Voltage"]["value"])
 
 
 if __name__ == "__main__":
