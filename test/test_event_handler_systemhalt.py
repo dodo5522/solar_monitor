@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
+import subprocess
+import sys
 import unittest
 from datetime import datetime
 from solar_monitor.event.handler import SystemHaltEventHandler
@@ -25,47 +27,42 @@ class TestSystemHaltEventHandler(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @unittest.skip
-    def test_exec(self):
-        class _DummyKeenClient(object):
-            pass
+    @patch("solar_monitor.event.handler.subprocess.Popen", autospec=True)
+    def test_run_command(self, mocked_popen):
+        cmd_dummy = "shutdown -h now"
 
-        # 差分表示の上限をなくす
-        self.maxDiff = None
+        proc = MagicMock()
+        proc.communicate = MagicMock(return_value=[b"", b""])
+        mocked_popen.return_value = proc
 
-        kc = _DummyKeenClient()
-        kc.add_events = MagicMock(return_value=None)
+        handler = SystemHaltEventHandler(cmd_dummy)
+        handler.start()
+        handler.put_q([])
+        handler.join_q()
+        handler.stop()
+        handler.join()
 
-        kc_patch = patch('solar_monitor.hook.keenio.KeenClient', autospec=True, return_value=kc)
-        mock_kc = kc_patch.start()
+        mocked_popen.assert_called_once_with(cmd_dummy.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-        dummy_project_id = 'dummy_project_id'
-        dummy_write_key = 'dummy_write_key'
-        kh = KeenIoHandler(dummy_project_id, dummy_write_key)
+    @patch("solar_monitor.event.handler.subprocess.Popen", autospec=True)
+    def test_not_run_command(self, mocked_popen):
+        cmd_dummy = ""
 
-        args = {}
-        args['source'] = 'solar'
-        args['at'] = datetime.now()
-        args['data'] = {
-            'Array Current': {'group': 'Array', 'unit': 'A', 'value': 1.4},
-            'Array Voltage': {'group': 'Array', 'unit': 'V', 'value': 53.41}}
+        proc = MagicMock()
+        proc.communicate = MagicMock(return_value=[b"", b""])
+        mocked_popen.return_value = proc
 
-        kh.exec(args)
+        handler = SystemHaltEventHandler(cmd_dummy)
+        handler.start()
+        handler.put_q([])
+        handler.join_q()
+        handler.stop()
+        handler.join()
 
-        kc_patch.stop()
-
-        mock_kc.assert_called_once_with(project_id=dummy_project_id, write_key=dummy_write_key)
-        self.assertEqual(kc.add_events.call_count, 1)
-
-        for items in kc.add_events.call_args[0][0]['offgrid']:
-            self.assertIn('keen', items)
-            items.pop('keen')
-            self.assertEqual('solar', items['source'])
-            items.pop('source')
-
-        for items in kc.add_events.call_args[0][0]['offgrid']:
-            label = items.pop('label')
-            self.assertEqual(set(args['data'][label].items()), set(items.items()))
+        if sys.version_info[:2] >= (3, 5):
+            mocked_popen.assert_not_called()
+        else:
+            self.assertFalse(mocked_popen.called)
 
 
 if __name__ == "__main__":

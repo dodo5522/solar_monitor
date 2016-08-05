@@ -35,7 +35,7 @@ class SystemHaltEventHandler(IEventHandler):
         Args:
             data: Pass to the registered event handlers.
         """
-        if not self._cmd:
+        if not self.cmd_:
             logger.warning("Running command is not set.")
             return
 
