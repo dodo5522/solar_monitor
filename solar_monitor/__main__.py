@@ -132,8 +132,27 @@ def start_event_triggers(**kwargs):
     """
     data_updated_trigger = DataIsUpdatedTrigger()
 
-    if kwargs["battery_limit"]:
-        bat_low_trigger = BatteryLowTrigger(lowest_voltage=kwargs["battery_limit"])
+    if kwargs["keenio_project_id"] and kwargs["keenio_write_key"]:
+        h = KeenIoEventHandler(
+            project_id=kwargs["keenio_project_id"],
+            write_key=kwargs["keenio_write_key"])
+
+        data_updated_trigger.append(h)
+
+    if kwargs["xively_api_key"] and kwargs["xively_feed_key"]:
+        h = XivelyEventHandler(
+            api_key=kwargs["xively_api_key"],
+            feed_key=kwargs["xively_feed_key"])
+        data_updated_trigger.append(h)
+
+    if kwargs["battery_monitor_enabled"]:
+        if kwargs["battery_limit"]:
+            bat_low_trigger = BatteryLowTrigger(
+                lowest_voltage=kwargs["battery_limit"])
+
+            bat_low_trigger.append(
+                SystemHaltEventHandler(
+                    cmd=kwargs["battery_limit_hook_script"]))
 
 # FIXME: Implement twittter bot
 #    bat_ful_trigger = BatteryFullTrigger(voltage=26.0)
@@ -153,29 +172,10 @@ def start_event_triggers(**kwargs):
 #        panel_tmp_hi_trigger.append(h)
 #        panel_tmp_lo_trigger.append(h)
 
-    if kwargs["battery_monitor_enabled"]:
-        h = SystemHaltEventHandler(
-            cmd=kwargs["battery_limit_hook_script"])
-
-        bat_low_trigger.append(h)
-
-    if kwargs["keenio_project_id"] and kwargs["keenio_write_key"]:
-        h = KeenIoEventHandler(
-            project_id=kwargs["keenio_project_id"],
-            write_key=kwargs["keenio_write_key"])
-
-        data_updated_trigger.append(h)
-
-    if kwargs["xively_api_key"] and kwargs["xively_feed_key"]:
-        h = XivelyEventHandler(
-            api_key=kwargs["xively_api_key"],
-            feed_key=kwargs["xively_feed_key"])
-        data_updated_trigger.append(h)
-
-    if "bat_low_trigger" in locals():
-        EVENT_TRIGGERS.append(bat_low_trigger)
     if "data_updated_trigger" in locals():
         EVENT_TRIGGERS.append(data_updated_trigger)
+    if "bat_low_trigger" in locals():
+        EVENT_TRIGGERS.append(bat_low_trigger)
 
     for trigger in EVENT_TRIGGERS:
         trigger.start()
