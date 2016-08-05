@@ -6,6 +6,8 @@ from solar_monitor.event.base import IEventHandler
 
 
 class TestIEventHandler(unittest.TestCase):
+    """ 親クラスのIEventListenerで実施済みテスト以外をテストする """
+
     @classmethod
     def setUpClass(cls):
         pass
@@ -20,10 +22,13 @@ class TestIEventHandler(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @unittest.skip
-    def test_temp(self):
+    def test_q_max(self):
+        """ queue最大値設定が反映されるかテストする """
         eh = IEventHandler()
-        eh.start()
+        self.assertEqual(eh.q_.maxsize, 5)
+
+        eh = IEventHandler(q_max=10)
+        self.assertEqual(eh.q_.maxsize, 10)
 
 
 if __name__ == "__main__":

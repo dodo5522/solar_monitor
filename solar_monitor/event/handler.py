@@ -16,9 +16,9 @@
 #   limitations under the License.
 
 import subprocess
+import xively
+from keen.client import KeenClient
 from solar_monitor import logger
-from solar_monitor.cloud.keenio import KeenIoCloudService
-from solar_monitor.cloud.xively import XivelyCloudService
 from solar_monitor.event.base import IEventHandler
 
 
@@ -35,7 +35,7 @@ class SystemHaltEventHandler(IEventHandler):
         Args:
             data: Pass to the registered event handlers.
         """
-        if not self._cmd:
+        if not self.cmd_:
             logger.warning("Running command is not set.")
             return
 
@@ -53,7 +53,8 @@ class KeenIoEventHandler(IEventHandler):
 
     def __init__(self, project_id, write_key, q_max=5):
         IEventHandler.__init__(self, q_max=q_max)
-        self.driver_ = KeenIoCloudService(
+
+        self.client_ = KeenClient(
             project_id=project_id,
             write_key=write_key)
 
@@ -63,8 +64,21 @@ class KeenIoEventHandler(IEventHandler):
         Args:
             data: Pass to the registered event handlers.
         """
-        self.driver_.set_data_to_server(data)
-        logger.info("{} sent data to cloud server.".format(type(self).__name__))
+        data_source = data["source"]
+        at = data["at"]
+
+        upload_items = []
+        for label, datum in data["data"].items():
+            upload_item = datum
+            upload_item["label"] = label
+            upload_item["source"] = data_source
+            upload_item["keen"] = {"timestamp": "{}Z".format(at.isoformat())}
+            upload_items.append(upload_item)
+
+        self.client_.add_events({"offgrid": upload_items})
+
+        logger.info("{} sent data to keenio at {}".format(
+            type(self).__name__, at))
 
 
 class XivelyEventHandler(IEventHandler):
@@ -72,8 +86,9 @@ class XivelyEventHandler(IEventHandler):
 
     def __init__(self, api_key, feed_key, q_max=5):
         IEventHandler.__init__(self, q_max=q_max)
-        self.driver_ = XivelyCloudService(
-            api_key=api_key, feed_key=feed_key)
+
+        api = xively.XivelyAPIClient(api_key)
+        self.client_ = api.feeds.get(feed_key)
 
     def _run(self, data):
         """ Procedure to run when data received from trigger thread.
@@ -81,5 +96,20 @@ class XivelyEventHandler(IEventHandler):
         Args:
             data: Pass to the registered event handlers.
         """
-        self.driver_.set_data_to_server(data)
-        logger.info("{} sent data to cloud server.".format(type(self).__name__))
+        at = data["at"]
+
+        datastreams = []
+        for key, data in data["data"].items():
+            datastreams.append(
+                xively.Datastream(
+                    id="".join(key.split()),
+                    current_value=data["value"],
+                    at=at
+                )
+            )
+
+        self.client_.datastreams = datastreams
+        self.client_.update()
+
+        logger.info("{} sent data to xively at {}".format(
+            type(self).__name__, at))
