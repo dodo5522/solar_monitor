@@ -17,6 +17,7 @@
 
 import subprocess
 import xively
+import tweepy
 from keen.client import KeenClient
 from solar_monitor import logger
 from solar_monitor.event.base import IEventHandler
@@ -113,3 +114,32 @@ class XivelyEventHandler(IEventHandler):
 
         logger.info("{} sent data to xively at {}".format(
             type(self).__name__, at))
+
+
+class TweetBotEventHandler(IEventHandler):
+    def __init__(self, path_conf, q_max=5):
+        IEventHandler.__init__(self, q_max=q_max)
+
+        self.get_keys(path_conf)
+
+        auth = tweepy.OAuthHandler(
+            consumer_key=self.consumer_key,
+            consumer_secret=self.consumer_secret)
+
+        auth.set_access_token(key=self.key, secret=self.secret)
+
+        self.api_ = tweepy.API(auth)
+
+    def get_keys(self, path_conf):
+        with open(path_conf) as f:
+            keys = {line.split("=")[0]: line.split("=")[1] for line in f.readlines()}
+
+        logger.debug(str(keys))
+
+        self.consumer_key = keys["twitter_consumer_key"].strip()
+        self.consumer_secret = keys["twitter_consumer_secret"].strip()
+        self.key = keys["twitter_key"].strip()
+        self.secret = keys["twitter_secret"].strip()
+
+    def _run(self, data):
+        self.api_.update_status(data)
