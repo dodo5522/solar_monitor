@@ -30,6 +30,7 @@ from solar_monitor.event.trigger import BatteryLowTrigger
 from solar_monitor.event.handler import SystemHaltEventHandler
 from solar_monitor.event.handler import KeenIoEventHandler
 from solar_monitor.event.handler import XivelyEventHandler
+from solar_monitor.event.handler import TweetBotEventHandler
 
 
 EVENT_TRIGGERS = []
@@ -131,6 +132,10 @@ def start_event_triggers(**kwargs):
         None
     """
     data_updated_trigger = DataIsUpdatedTrigger()
+
+    # TODO: default/solar_monitor.confに設定追加したら、kwargsで条件分岐するように修正する
+    h = TweetBotEventHandler("/tmp/twitter.conf")
+    data_updated_trigger.append(h)
 
     if kwargs["keenio_project_id"] and kwargs["keenio_write_key"]:
         h = KeenIoEventHandler(

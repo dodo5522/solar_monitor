@@ -27,7 +27,7 @@ class TestTweetBotEventHandler(unittest.TestCase):
         pass
 
     def test_run_command(self):
-        handler = TweetBotEventHandler("/Users/takashi/Development/solar_monitor/twitter.conf")
+        handler = TweetBotEventHandler("/tmp/twitter.conf")
         handler.start()
         handler.put_q("bot test at " + str(datetime.now()) + ".")
         handler.join_q()

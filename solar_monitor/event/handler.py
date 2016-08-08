@@ -142,4 +142,10 @@ class TweetBotEventHandler(IEventHandler):
         self.secret = keys["twitter_secret"].strip()
 
     def _run(self, data):
-        self.api_.update_status(data)
+        at = data["at"]
+
+        msg = "{YEAR}年{MONTH}月{DAY}日{HOUR}時{MINUTE}分{SECOND}秒にデータを取得しました。\nバッテリ電圧は{BATTERY_VOLTAGE}です。".format(
+            YEAR=at.year, MONTH=at.month, DAY=at.day, HOUR=at.hour, MINUTE=at.minute, SECOND=at.second,
+            BATTERY_VOLTAGE=round(number=data["data"]["Battery Voltage"]["value"], ndigits=2))
+
+        self.api_.update_status(msg)
