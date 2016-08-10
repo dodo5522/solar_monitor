@@ -33,23 +33,18 @@ from solar_monitor.event.handler import XivelyEventHandler
 from solar_monitor.event.handler import TweetBotEventHandler
 
 
-EVENT_TRIGGERS = []
 CHARGE_CONTROLLER = tsmppt60_driver
 
 
-def start_event_triggers(**kwargs):
-    """ Initialize and start event trigger/handler.
+def init_triggers(**kwargs):
+    """ Initialize event triggers and handlers according to settings.
 
     Keyword Args:
         kwargs: see init_args() function to know what option is there.
     Returns:
-        None
+        list of event triggers which have event hnadlers according to config setting.
     """
     data_updated_trigger = DataIsUpdatedTrigger()
-
-    # TODO: default/solar_monitor.confに設定追加したら、kwargsで条件分岐するように修正する
-    h = TweetBotEventHandler("/tmp/twitter.conf")
-    data_updated_trigger.append(h)
 
     if kwargs["keenio_project_id"] and kwargs["keenio_write_key"]:
         h = KeenIoEventHandler(
@@ -62,6 +57,7 @@ def start_event_triggers(**kwargs):
         h = XivelyEventHandler(
             api_key=kwargs["xively_api_key"],
             feed_key=kwargs["xively_feed_key"])
+
         data_updated_trigger.append(h)
 
     if kwargs["battery_monitor_enabled"]:
@@ -73,7 +69,10 @@ def start_event_triggers(**kwargs):
                 SystemHaltEventHandler(
                     cmd=kwargs["battery_limit_hook_script"]))
 
-# FIXME: Implement twittter bot
+    # FIXME: default/solar_monitor.confに設定追加したら、kwargsで条件分岐するように修正する
+    h = TweetBotEventHandler("/tmp/twitter.conf")
+    data_updated_trigger.append(h)
+
 #    bat_ful_trigger = BatteryFullTrigger(voltage=26.0)
 #    panel_tmp_hi_trigger = PanelTempHighTrigger(temp=50.0)
 #    panel_tmp_lo_trigger = PanelTempLowTrigger(temp=20.0)
@@ -91,22 +90,41 @@ def start_event_triggers(**kwargs):
 #        panel_tmp_hi_trigger.append(h)
 #        panel_tmp_lo_trigger.append(h)
 
-    if "data_updated_trigger" in locals():
-        EVENT_TRIGGERS.append(data_updated_trigger)
-    if "bat_low_trigger" in locals():
-        EVENT_TRIGGERS.append(bat_low_trigger)
+    triggers = []
 
-    for trigger in EVENT_TRIGGERS:
+    if "data_updated_trigger" in locals():
+        triggers.append(data_updated_trigger)
+    if "bat_low_trigger" in locals():
+        triggers.append(bat_low_trigger)
+
+    return triggers
+
+
+def start_triggers(triggers):
+    """ Start all event triggers. At the same time, the all event handler
+        included in the event triggers also starts.
+
+    Args:
+        triggers: List of event trigger to be started.
+    Returns:
+        None
+    """
+    for trigger in triggers:
         trigger.start()
 
 
-def stop_event_triggers():
-    """ Stop event trigger/handler. """
+def stop_triggers(triggers):
+    """ Stop event trigger/handler.
 
-    for trigger in EVENT_TRIGGERS:
+    Args:
+        triggers: List of event trigger to be started.
+    Returns:
+        None
+    """
+    for trigger in triggers:
         trigger.stop()
 
-    for trigger in EVENT_TRIGGERS:
+    for trigger in triggers:
         trigger.join()
 
 
@@ -121,10 +139,13 @@ def event_loop(**kwargs):
     Exceptions:
         queue.Full: If queue of event handler is full
     """
-    system_status = CHARGE_CONTROLLER.SystemStatus(kwargs["host_name"])
+    host_name = kwargs["host_name"]
+    is_status_all = kwargs["status_all"]
+    triggers = kwargs["triggers"]
 
     now = datetime.datetime.utcnow()
-    got_data = system_status.get(kwargs["status_all"])
+    system_status = CHARGE_CONTROLLER.SystemStatus(host_name)
+    got_data = system_status.get(is_status_all)
 
     rawdata = {}
     rawdata["source"] = "solar"
@@ -137,10 +158,10 @@ def event_loop(**kwargs):
                 date=now, group=data["group"], elem=key,
                 value=str(data["value"]), unit=data["unit"]))
 
-    for trigger in EVENT_TRIGGERS:
+    for trigger in triggers:
         trigger.put_q(rawdata)
 
-    for trigger in EVENT_TRIGGERS:
+    for trigger in triggers:
         trigger.join_q()
 
 
@@ -154,11 +175,13 @@ def main():
         event_loop(**kwargs)
         return
 
-    start_event_triggers(**kwargs)
+    triggers = init_triggers(**kwargs)
+    start_triggers(triggers)
 
     kwargs = {}
     kwargs["host_name"] = args.host_name
     kwargs["status_all"] = args.status_all
+    kwargs["triggers"] = triggers
     timer = RecursiveTimer(args.interval, event_loop, **kwargs)
 
     try:
@@ -173,6 +196,6 @@ def main():
         raise
     finally:
         timer.cancel()
-        stop_event_triggers()
+        stop_triggers(triggers)
 
 main()
