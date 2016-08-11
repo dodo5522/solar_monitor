@@ -18,7 +18,7 @@
 import sys
 import time
 import datetime
-import tsmppt60_driver
+import tsmppt60_driver as CHARGE_CONTROLLER
 from solar_monitor import argparser
 from solar_monitor import logger
 from solar_monitor.timer import RecursiveTimer
@@ -33,9 +33,6 @@ from solar_monitor.event.handler import XivelyEventHandler
 from solar_monitor.event.handler import TweetBotEventHandler
 
 
-CHARGE_CONTROLLER = tsmppt60_driver
-
-
 def init_triggers(**kwargs):
     """ Initialize event triggers and handlers according to settings.
 
@@ -46,49 +43,47 @@ def init_triggers(**kwargs):
     """
     data_updated_trigger = DataIsUpdatedTrigger()
 
-    if kwargs["keenio_project_id"] and kwargs["keenio_write_key"]:
-        h = KeenIoEventHandler(
-            project_id=kwargs["keenio_project_id"],
-            write_key=kwargs["keenio_write_key"])
+    def get_configs(*configs):
+        for conf in configs:
+            if not conf:
+                return ()
+        return configs
 
-        data_updated_trigger.append(h)
+    configs = get_configs(
+        kwargs["keenio_project_id"], kwargs["keenio_write_key"])
 
-    if kwargs["xively_api_key"] and kwargs["xively_feed_key"]:
-        h = XivelyEventHandler(
-            api_key=kwargs["xively_api_key"],
-            feed_key=kwargs["xively_feed_key"])
+    if configs:
+        data_updated_trigger.append(KeenIoEventHandler(*configs))
 
-        data_updated_trigger.append(h)
+    configs = get_configs(
+        kwargs["xively_api_key"], kwargs["xively_feed_key"])
 
-    if kwargs["battery_monitor_enabled"]:
-        if kwargs["battery_limit"]:
-            bat_low_trigger = BatteryLowTrigger(
-                lowest_voltage=kwargs["battery_limit"])
+    if configs:
+        data_updated_trigger.append(XivelyEventHandler(*configs))
 
-            bat_low_trigger.append(
-                SystemHaltEventHandler(
-                    cmd=kwargs["battery_limit_hook_script"]))
+    configs = get_configs(
+        kwargs["battery_monitor_enabled"],
+        kwargs["battery_limit"],
+        kwargs["battery_limit_hook_script"])
 
-    # FIXME: default/solar_monitor.confに設定追加したら、kwargsで条件分岐するように修正する
-    h = TweetBotEventHandler("/tmp/twitter.conf")
-    data_updated_trigger.append(h)
+    if configs:
+        bat_low_trigger = BatteryLowTrigger(configs[1])
+
+        bat_low_trigger.append(
+            SystemHaltEventHandler(configs[2]))
+
+    configs = get_configs(
+        kwargs["twitter_consumer_key"],
+        kwargs["twitter_consumer_secret"],
+        kwargs["twitter_key"],
+        kwargs["twitter_secret"])
+
+    if configs:
+        data_updated_trigger.append(TweetBotEventHandler(*configs))
 
 #    bat_ful_trigger = BatteryFullTrigger(voltage=26.0)
 #    panel_tmp_hi_trigger = PanelTempHighTrigger(temp=50.0)
 #    panel_tmp_lo_trigger = PanelTempLowTrigger(temp=20.0)
-
-# FIXME: Implement twittter bot
-#    if kwargs["twitter_bot_enabled"]:
-#        from solar_monitor.event.handler import TweetEventHandler
-#
-#        h = TweetEventHandler(
-#            api_key=kwargs[""],
-#            some_id=kwargs[""])
-#
-#        bat_low_trigger.append(h)
-#        bat_ful_trigger.append(h)
-#        panel_tmp_hi_trigger.append(h)
-#        panel_tmp_lo_trigger.append(h)
 
     triggers = []
 

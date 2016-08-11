@@ -60,6 +60,30 @@ def init(argv=sys.argv[1:]):
         help="keenio write key"
     )
     arg.add_argument(
+        "-tck", "--twitter-consumer-key",
+        type=str,
+        nargs='?', default=None, const=None,
+        help="Consumer Key (API Key)"
+    )
+    arg.add_argument(
+        "-tcs", "--twitter-consumer-secret",
+        type=str,
+        nargs='?', default=None, const=None,
+        help="Consumer Secret (API Secret)"
+    )
+    arg.add_argument(
+        "-tk", "--twitter-key",
+        type=str,
+        nargs='?', default=None, const=None,
+        help="Access Token"
+    )
+    arg.add_argument(
+        "-ts", "--twitter-secret",
+        type=str,
+        nargs='?', default=None, const=None,
+        help="Access Token Secret"
+    )
+    arg.add_argument(
         "-be", "--battery-monitor-enabled",
         action="store_true",
         default=False,
