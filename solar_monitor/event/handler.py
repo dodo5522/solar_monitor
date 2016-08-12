@@ -17,6 +17,7 @@
 
 import subprocess
 import xively
+import tweepy
 from keen.client import KeenClient
 from solar_monitor import logger
 from solar_monitor.event.base import IEventHandler
@@ -113,3 +114,43 @@ class XivelyEventHandler(IEventHandler):
 
         logger.info("{} sent data to xively at {}".format(
             type(self).__name__, at))
+
+
+class TweetBotEventHandler(IEventHandler):
+    """ Tweet bot handler. Tweets some messages on your twitter account.
+
+    Args:
+        consumer_key: Consumer Key (API Key)
+        consumer_secret: Consumer Secret (API Secret)
+        key: Access Token
+        secret: Access Token Secret
+        q_max: Queue size of internal.
+
+    Returns:
+        IEventHandler object.
+    """
+    def __init__(
+            self,
+            consumer_key,
+            consumer_secret,
+            key,
+            secret,
+            q_max=5):
+
+        IEventHandler.__init__(self, q_max=q_max)
+
+        auth = tweepy.OAuthHandler(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret)
+        auth.set_access_token(key=key, secret=secret)
+
+        self.api_ = tweepy.API(auth)
+
+    def _run(self, data):
+        at = data["at"]
+
+        msg = "{YEAR}年{MONTH}月{DAY}日{HOUR}時{MINUTE}分{SECOND}秒にデータを取得しました。\nバッテリ電圧は{BATTERY_VOLTAGE}です。".format(
+            YEAR=at.year, MONTH=at.month, DAY=at.day, HOUR=at.hour, MINUTE=at.minute, SECOND=at.second,
+            BATTERY_VOLTAGE=round(number=data["data"]["Battery Voltage"]["value"], ndigits=2))
+
+        self.api_.update_status(msg)
