@@ -124,6 +124,8 @@ class TweetBotEventHandler(IEventHandler):
         consumer_secret: Consumer Secret (API Secret)
         key: Access Token
         secret: Access Token Secret
+        msgs: list of messages
+        value_label: data's label you want to show on msgs as VALUE label
         q_max: Queue size of internal.
 
     Returns:
@@ -135,6 +137,8 @@ class TweetBotEventHandler(IEventHandler):
             consumer_secret,
             key,
             secret,
+            msgs=["バッテリ電圧は{VALUE}{UNIT}です。", "{YEAR}年{MONTH}月{DAY}日{HOUR}時{MINUTE}分に取得したデータになります。"],
+            value_label="Battery Voltage",
             q_max=5):
 
         IEventHandler.__init__(self, q_max=q_max)
@@ -145,12 +149,15 @@ class TweetBotEventHandler(IEventHandler):
         auth.set_access_token(key=key, secret=secret)
 
         self.api_ = tweepy.API(auth)
+        self.msg_ = "\n".join(msgs)
+        self.label_ = value_label
 
     def _run(self, data):
         at = data["at"]
 
-        msg = "{YEAR}年{MONTH}月{DAY}日{HOUR}時{MINUTE}分{SECOND}秒にデータを取得しました。\nバッテリ電圧は{BATTERY_VOLTAGE}です。".format(
+        msg = self.msg_.format(
             YEAR=at.year, MONTH=at.month, DAY=at.day, HOUR=at.hour, MINUTE=at.minute, SECOND=at.second,
-            BATTERY_VOLTAGE=round(number=data["data"]["Battery Voltage"]["value"], ndigits=2))
+            UNIT=data["data"][self.label_]["unit"],
+            VALUE=round(number=data["data"][self.label_]["value"], ndigits=2))
 
         self.api_.update_status(msg)

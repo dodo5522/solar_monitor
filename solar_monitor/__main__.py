@@ -20,79 +20,9 @@ import time
 import datetime
 import tsmppt60_driver as CHARGE_CONTROLLER
 from solar_monitor import argparser
+from solar_monitor import config
 from solar_monitor import logger
 from solar_monitor.timer import RecursiveTimer
-from solar_monitor.event.trigger import DataIsUpdatedTrigger
-from solar_monitor.event.trigger import BatteryLowTrigger
-# from solar_monitor.event.trigger import BatteryFullTrigger
-# from solar_monitor.event.trigger import PanelTempHighTrigger
-# from solar_monitor.event.trigger import PanelTempLowTrigger
-from solar_monitor.event.handler import SystemHaltEventHandler
-from solar_monitor.event.handler import KeenIoEventHandler
-from solar_monitor.event.handler import XivelyEventHandler
-from solar_monitor.event.handler import TweetBotEventHandler
-
-
-def init_triggers(**kwargs):
-    """ Initialize event triggers and handlers according to settings.
-
-    Keyword Args:
-        kwargs: see init_args() function to know what option is there.
-    Returns:
-        list of event triggers which have event hnadlers according to config setting.
-    """
-    data_updated_trigger = DataIsUpdatedTrigger()
-
-    def get_configs(*configs):
-        for conf in configs:
-            if not conf:
-                return ()
-        return configs
-
-    configs = get_configs(
-        kwargs["keenio_project_id"], kwargs["keenio_write_key"])
-
-    if configs:
-        data_updated_trigger.append(KeenIoEventHandler(*configs))
-
-    configs = get_configs(
-        kwargs["xively_api_key"], kwargs["xively_feed_key"])
-
-    if configs:
-        data_updated_trigger.append(XivelyEventHandler(*configs))
-
-    configs = get_configs(
-        kwargs["battery_monitor_enabled"],
-        kwargs["battery_limit"],
-        kwargs["battery_limit_hook_script"])
-
-    if configs:
-        bat_low_trigger = BatteryLowTrigger(configs[1])
-
-        bat_low_trigger.append(
-            SystemHaltEventHandler(configs[2]))
-
-    configs = get_configs(
-        kwargs["twitter_consumer_key"],
-        kwargs["twitter_consumer_secret"],
-        kwargs["twitter_key"],
-        kwargs["twitter_secret"])
-
-    if configs:
-        data_updated_trigger.append(TweetBotEventHandler(*configs))
-
-#    bat_ful_trigger = BatteryFullTrigger(voltage=26.0)
-#    panel_tmp_hi_trigger = PanelTempHighTrigger(temp=50.0)
-#    panel_tmp_lo_trigger = PanelTempLowTrigger(temp=20.0)
-
-    triggers = []
-
-    if "data_updated_trigger" in locals():
-        triggers.append(data_updated_trigger)
-    if "bat_low_trigger" in locals():
-        triggers.append(bat_low_trigger)
-
-    return triggers
 
 
 def start_triggers(triggers):
@@ -170,7 +100,7 @@ def main():
         event_loop(**kwargs)
         return
 
-    triggers = init_triggers(**kwargs)
+    triggers = config.init_triggers(**kwargs)
     start_triggers(triggers)
 
     kwargs = {}
