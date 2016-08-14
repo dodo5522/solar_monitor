@@ -18,8 +18,7 @@
 from solar_monitor.event.trigger import DataIsUpdatedTrigger
 from solar_monitor.event.trigger import BatteryLowTrigger
 from solar_monitor.event.trigger import BatteryFullTrigger
-# from solar_monitor.event.trigger import PanelTempHighTrigger
-# from solar_monitor.event.trigger import PanelTempLowTrigger
+from solar_monitor.event.trigger import ChargeCurrentHighTrigger
 from solar_monitor.event.handler import SystemHaltEventHandler
 from solar_monitor.event.handler import KeenIoEventHandler
 from solar_monitor.event.handler import XivelyEventHandler
@@ -104,6 +103,26 @@ def init_triggers(**kwargs):
         bat_ful_trigger = BatteryFullTrigger(full_voltage=28.0)
         bat_ful_trigger.append(TweetBotEventHandler(*configs, **kwconfigs))
 
+    # TODO: to see config settings for current high.
+    configs = get_configs(
+        # kwargs["charge_current_high"],
+        kwargs["twitter_consumer_key"],
+        kwargs["twitter_consumer_secret"],
+        kwargs["twitter_key"],
+        kwargs["twitter_secret"])
+
+    if configs:
+        kwconfigs = {}
+        kwconfigs["msgs"] = [
+            "太陽が出てきましたかね。本領発揮です。",
+            "充電流量が{VALUE}[{UNIT}]になりました。",
+            "{YEAR}年{MONTH}月{DAY}日{HOUR}時{MINUTE}分に取得したデータを元にしています。"]
+        kwconfigs["value_label"] = "Charge Current"
+
+        # TODO: to see config settings for current high.
+        current_high_trigger = ChargeCurrentHighTrigger(high_current=15.0)
+        bat_ful_trigger.append(TweetBotEventHandler(*configs, **kwconfigs))
+
     triggers = []
     if "data_updated_trigger" in locals():
         triggers.append(data_updated_trigger)
@@ -111,6 +130,8 @@ def init_triggers(**kwargs):
         triggers.append(bat_low_trigger)
     if "bat_ful_trigger" in locals():
         triggers.append(bat_ful_trigger)
+    if "current_high_trigger" in locals():
+        triggers.append(current_high_trigger)
 
     return triggers
 

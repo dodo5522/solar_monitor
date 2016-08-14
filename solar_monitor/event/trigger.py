@@ -133,3 +133,52 @@ class BatteryFullTrigger(IEventTrigger):
                 return True
 
         return False
+
+
+class ChargeCurrentHighTrigger(IEventTrigger):
+    """ Event trigger to pass the data if charge current got to be high. The
+        instance object of this class has pre_current_ statical value, so you
+        should keep this instance during monitoring solar system.
+
+    Args:
+        high_current: Charge current to be input to battery.
+    Returns:
+        Instance object.
+    """
+    def __init__(self, high_current, q_max=5):
+        IEventTrigger.__init__(self, q_max=q_max)
+        self.high_current_ = high_current
+        self.pre_current_ = None
+
+    def _is_condition(self, data):
+        """ Returns True if charge current getting high and run over the limit
+            of highest current setting. _run_in_condition() method run if this
+            method returns True.
+
+        Args:
+            data: To judge the condition.
+        Returns:
+            True if the trigger condition is matched.
+        Raises:
+            KeyError: Some key doesn't exist in received data.
+        """
+
+        logger.debug("Got data on {} at {}".format(type(self).__name__, data["at"]))
+
+        current_charge_value = data["data"]["Charge Current"]["value"]
+
+        if self.pre_current_ is None:
+            self.pre_current_ = current_charge_value
+
+            # If the charge current is already high when the first checking,
+            # returns True and run some procedure.
+            if self.high_current_ <= current_charge_value:
+                return True
+
+        # If the charge current run over the limit of highest charege current,
+        # returns True and run some procedure.
+        if self.pre_current_ < self.high_current_:
+            if self.high_current_ <= current_charge_value:
+                return True
+
+        return False
