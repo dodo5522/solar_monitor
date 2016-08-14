@@ -39,8 +39,8 @@ def init_triggers(**kwargs):
     def get_configs(*configs):
         for conf in configs:
             if not conf:
-                return ()
-        return configs
+                return []
+        return list(configs)
 
     configs = get_configs(
         kwargs["keenio_project_id"],
@@ -74,19 +74,35 @@ def init_triggers(**kwargs):
 
     if configs:
         kwconfigs = {}
-        kwconfigs["msg"] = ["バッテリ電圧がかなり低下しています。", "現在{VALUE}[V]ですので、PCサーバ等の電源を落とします。", "{YEAR}年{MONTH}月{DAY}日{HOUR}時{MINUTE}分に取得したデータを元にしています。"]
+        kwconfigs["msgs"] = [
+            "バッテリ電圧がかなり低下しています。",
+            "現在{VALUE}[{UNIT}]ですので、PCサーバ等の電源を落とします。",
+            "{YEAR}年{MONTH}月{DAY}日{HOUR}時{MINUTE}分に取得したデータを元にしています。"]
         kwconfigs["value_label"] = "Battery Voltage"
 
-        bat_low_trigger.append(
-            TweetBotEventHandler(*configs, **kwconfigs))
+        # remove "battery_limit" member.
+        configs.pop(0)
+        bat_low_trigger.append(TweetBotEventHandler(*configs, **kwconfigs))
 
-    # TODO: to see config settings.
-    bat_ful_trigger = BatteryFullTrigger(full_voltage=28.0)
-    bat_ful_trigger.append(
-        TweetBotEventHandler(
-            *configs,
-            msgs=["バッテリが満充電近くまで回復しました。", "現在{VALUE}[V]です。", "{YEAR}年{MONTH}月{DAY}日{HOUR}時{MINUTE}分に取得したデータを元にしています。"],
-            value_label="Battery Voltage"))
+    # TODO: to see config settings for battery full limitation.
+    configs = get_configs(
+        # kwargs["battery_full_limit"],
+        kwargs["twitter_consumer_key"],
+        kwargs["twitter_consumer_secret"],
+        kwargs["twitter_key"],
+        kwargs["twitter_secret"])
+
+    if configs:
+        kwconfigs = {}
+        kwconfigs["msgs"] = [
+            "バッテリが満充電近くまで回復しました。",
+            "現在{VALUE}[{UNIT}]です。",
+            "{YEAR}年{MONTH}月{DAY}日{HOUR}時{MINUTE}分に取得したデータを元にしています。"]
+        kwconfigs["value_label"] = "Battery Voltage"
+
+        # TODO: to see config settings for battery full limitation.
+        bat_ful_trigger = BatteryFullTrigger(full_voltage=28.0)
+        bat_ful_trigger.append(TweetBotEventHandler(*configs, **kwconfigs))
 
     triggers = []
     if "data_updated_trigger" in locals():
