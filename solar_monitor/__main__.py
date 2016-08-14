@@ -53,6 +53,22 @@ def stop_triggers(triggers):
         trigger.join()
 
 
+def put_to_triggers(triggers, data):
+    """ Put data to all event trigger.
+
+    Args:
+        triggers: List of event trigger to be started.
+        data: data object to be put to all trigger.
+    Returns:
+        None
+    """
+    for trigger in triggers:
+        trigger.put_q(data)
+
+    for trigger in triggers:
+        trigger.join_q()
+
+
 def event_loop(**kwargs):
     """ Monitor charge controller and update database like xively or
         internal database. This method should be called with a timer.
@@ -83,11 +99,7 @@ def event_loop(**kwargs):
                 date=now, group=data["group"], elem=key,
                 value=str(data["value"]), unit=data["unit"]))
 
-    for trigger in triggers:
-        trigger.put_q(rawdata)
-
-    for trigger in triggers:
-        trigger.join_q()
+    put_to_triggers(triggers, rawdata)
 
 
 def main():
