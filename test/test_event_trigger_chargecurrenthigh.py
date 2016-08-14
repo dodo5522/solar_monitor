@@ -29,7 +29,7 @@ class TestChargeCurrentHighTrigger(unittest.TestCase):
     def test_not_in_condition(self):
         DummyEventHandler = MagicMock(spec=IEventHandler)
 
-        event_trigger = ChargeCurrentHighTrigger(full_current=15.0)
+        event_trigger = ChargeCurrentHighTrigger(high_current=15.0)
         hoge_handler = DummyEventHandler()
 
         event_trigger.append(hoge_handler)
@@ -61,7 +61,7 @@ class TestChargeCurrentHighTrigger(unittest.TestCase):
     def test_higher_current_than_intialized_one(self):
         DummyEventHandler = MagicMock(spec=IEventHandler)
 
-        event_trigger = ChargeCurrentHighTrigger(full_current=15.0)
+        event_trigger = ChargeCurrentHighTrigger(high_current=15.0)
         hoge_handler = DummyEventHandler()
 
         event_trigger.append(hoge_handler)
@@ -91,7 +91,7 @@ class TestChargeCurrentHighTrigger(unittest.TestCase):
     def test_current_equals_intialized_one(self):
         DummyEventHandler = MagicMock(spec=IEventHandler)
 
-        event_trigger = ChargeCurrentHighTrigger(full_current=15.0)
+        event_trigger = ChargeCurrentHighTrigger(high_current=15.0)
         hoge_handler = DummyEventHandler()
 
         event_trigger.append(hoge_handler)
@@ -121,7 +121,7 @@ class TestChargeCurrentHighTrigger(unittest.TestCase):
     def test_current_gets_over_intialized_one(self):
         DummyEventHandler = MagicMock(spec=IEventHandler)
 
-        event_trigger = ChargeCurrentHighTrigger(full_current=15.0)
+        event_trigger = ChargeCurrentHighTrigger(high_current=15.0)
         hoge_handler = DummyEventHandler()
 
         event_trigger.append(hoge_handler)
