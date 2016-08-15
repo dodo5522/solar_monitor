@@ -115,7 +115,8 @@ class TestBatteryFullTrigger(unittest.TestCase):
             hoge_handler.put_q.call_args[0][0]["data"]["Battery Voltage"]["value"],
             expected_data["data"]["Battery Voltage"]["value"])
 
-    def test_voltage_gets_over_intialized_one(self):
+    def test_voltage_gets_over_intialized_one_more_than_2times(self):
+        """ 閾値を２回以上上回っても、トリガーを発火するのは最初の１回のみ """
         DummyEventHandler = MagicMock(spec=IEventHandler)
 
         event_trigger = BatteryFullTrigger(full_voltage=25.0)
@@ -129,7 +130,8 @@ class TestBatteryFullTrigger(unittest.TestCase):
                 "at": datetime.datetime.now().isoformat(),
                 "data": {
                     "Battery Voltage": {
-                        "value": 24.9
+                        "value": 24.9,
+                        "unit": "V"
                     }
                 }
             },
@@ -137,7 +139,17 @@ class TestBatteryFullTrigger(unittest.TestCase):
                 "at": datetime.datetime.now().isoformat(),
                 "data": {
                     "Battery Voltage": {
-                        "value": 25.1
+                        "value": 25.1,
+                        "unit": "V"
+                    }
+                }
+            },
+            {
+                "at": datetime.datetime.now().isoformat(),
+                "data": {
+                    "Battery Voltage": {
+                        "value": 25.2,
+                        "unit": "V"
                     }
                 }
             },
@@ -150,10 +162,10 @@ class TestBatteryFullTrigger(unittest.TestCase):
         event_trigger.stop()
         event_trigger.join()
 
-        self.assertEqual(hoge_handler.put_q.call_args[0][0]["at"], expected_data[-1]["at"])
+        self.assertEqual(hoge_handler.put_q.call_args[0][0]["at"], expected_data[-2]["at"])
         self.assertEqual(
             hoge_handler.put_q.call_args[0][0]["data"]["Battery Voltage"]["value"],
-            expected_data[-1]["data"]["Battery Voltage"]["value"])
+            expected_data[-2]["data"]["Battery Voltage"]["value"])
 
 
 if __name__ == "__main__":
