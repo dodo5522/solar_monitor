@@ -162,23 +162,23 @@ class ChargeCurrentHighTrigger(IEventTrigger):
         Raises:
             KeyError: Some key doesn't exist in received data.
         """
-
-        logger.debug("Got data on {} at {}".format(type(self).__name__, data["at"]))
-
+        ret = False
         current_charge_value = data["data"]["Charge Current"]["value"]
 
         if self.pre_current_ is None:
-            self.pre_current_ = current_charge_value
-
-            # If the charge current is already high when the first checking,
-            # returns True and run some procedure.
             if self.high_current_ <= current_charge_value:
-                return True
+                ret = True
+            self.pre_current_ = current_charge_value
 
         # If the charge current run over the limit of highest charege current,
         # returns True and run some procedure.
-        if self.pre_current_ < self.high_current_:
+        elif self.pre_current_ < self.high_current_:
             if self.high_current_ <= current_charge_value:
-                return True
+                ret = True
 
-        return False
+        self.pre_current_ = current_charge_value
+
+        logger.debug("Return {} on {} at {}".format(
+            ret, type(self).__name__, data["at"]))
+
+        return ret
