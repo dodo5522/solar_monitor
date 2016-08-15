@@ -35,7 +35,8 @@ class TestBatteryLowTrigger(unittest.TestCase):
             "at": datetime.datetime.now().isoformat(),
             "data": {
                 "Battery Voltage": {
-                    "value": 13.0
+                    "value": 13.0,
+                    "unit": "V"
                 }
             }
         }
@@ -59,7 +60,8 @@ class TestBatteryLowTrigger(unittest.TestCase):
             "at": datetime.datetime.now().isoformat(),
             "data": {
                 "Battery Voltage": {
-                    "value": 11.0
+                    "value": 11.0,
+                    "unit": "V"
                 }
             }
         }
@@ -84,7 +86,8 @@ class TestBatteryLowTrigger(unittest.TestCase):
             "at": datetime.datetime.now().isoformat(),
             "data": {
                 "Battery Voltage": {
-                    "value": 12.0
+                    "value": 12.0,
+                    "unit": "V"
                 }
             }
         }
@@ -92,7 +95,8 @@ class TestBatteryLowTrigger(unittest.TestCase):
             "at": datetime.datetime.now().isoformat(),
             "data": {
                 "Battery Voltage": {
-                    "value": 11.9
+                    "value": 11.9,
+                    "unit": "V"
                 }
             }
         }
