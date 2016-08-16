@@ -10,11 +10,6 @@ table(geo) {
     real latitude
 }
 
-table(group) {
-    primary_key(integer ix)
-    text name
-}
-
 table(source) {
     primary_key(integer ix)
     text name
@@ -29,17 +24,22 @@ table(data) {
     text timestamp
 }
 
+table(data_group) {
+    primary_key(integer ix)
+    text name
+}
+
 table(record) {
     primary_key(integer ix)
     integer data_ix
-    integer group_ix
+    integer data_group_ix
     integer source_ix
     integer geo_ix
     text created_at
 }
 
 record *-- data
-record *-- group
+record *-- data_group
 record *-- source
 record *-- geo
 @enduml
