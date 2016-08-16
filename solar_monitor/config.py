@@ -83,25 +83,25 @@ def init_triggers(**kwargs):
         configs.pop(0)
         bat_low_trigger.append(TweetBotEventHandler(*configs, **kwconfigs))
 
-    # TODO: to see config settings for battery full limitation.
-    configs = get_configs(
-        # kwargs["battery_full_limit"],
-        kwargs["twitter_consumer_key"],
-        kwargs["twitter_consumer_secret"],
-        kwargs["twitter_key"],
-        kwargs["twitter_secret"])
+    config = kwargs["battery_full_limit"]
+    if config:
+        bat_ful_trigger = BatteryFullTrigger(full_voltage=config)
 
-    if configs:
-        kwconfigs = {}
-        kwconfigs["msgs"] = [
-            "バッテリが満充電近くまで回復しました。",
-            "現在{VALUE}[{UNIT}]です。",
-            "{YEAR}年{MONTH}月{DAY}日{HOUR}時{MINUTE}分に取得したデータを元にしています。"]
-        kwconfigs["value_label"] = "Battery Voltage"
+        configs = get_configs(
+            kwargs["twitter_consumer_key"],
+            kwargs["twitter_consumer_secret"],
+            kwargs["twitter_key"],
+            kwargs["twitter_secret"])
 
-        # TODO: to see config settings for battery full limitation.
-        bat_ful_trigger = BatteryFullTrigger(full_voltage=28.0)
-        bat_ful_trigger.append(TweetBotEventHandler(*configs, **kwconfigs))
+        if configs:
+            kwconfigs = {}
+            kwconfigs["msgs"] = [
+                "バッテリが満充電近くまで回復しました。",
+                "現在{VALUE}[{UNIT}]です。",
+                "{YEAR}年{MONTH}月{DAY}日{HOUR}時{MINUTE}分に取得したデータを元にしています。"]
+            kwconfigs["value_label"] = "Battery Voltage"
+
+            bat_ful_trigger.append(TweetBotEventHandler(*configs, **kwconfigs))
 
     config = kwargs["charge_current_high"],
     if config:
