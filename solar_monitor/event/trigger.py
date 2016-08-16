@@ -64,26 +64,26 @@ class BatteryLowTrigger(IEventTrigger):
         Raises:
             KeyError: Some key doesn't exist in received data.
         """
-
-        logger.debug("Got data on {} at {}".format(type(self).__name__, data["at"]))
-
+        ret = False
         current_voltage = data["data"]["Battery Voltage"]["value"]
 
         if self.pre_voltage_ is None:
-            self.pre_voltage_ = current_voltage
-
-            # If the current voltage is already low when the first checking,
-            # returns True and run some procedure to save the battery power.
             if self.lowest_voltage_ > current_voltage:
-                return True
+                ret = True
+            self.pre_voltage_ = current_voltage
 
         # If the battery volate run over the limit of lowest batery voltate,
         # returns True and run some procedure to save the battery power.
-        if self.pre_voltage_ >= self.lowest_voltage_:
+        elif self.pre_voltage_ >= self.lowest_voltage_:
             if self.lowest_voltage_ > current_voltage:
-                return True
+                ret = True
 
-        return False
+        self.pre_voltage_ = current_voltage
+
+        logger.debug("Return {} on {} at {}".format(
+            ret, type(self).__name__, data["at"]))
+
+        return ret
 
 
 class BatteryFullTrigger(IEventTrigger):
@@ -113,26 +113,26 @@ class BatteryFullTrigger(IEventTrigger):
         Raises:
             KeyError: Some key doesn't exist in received data.
         """
-
-        logger.debug("Got data on {} at {}".format(type(self).__name__, data["at"]))
-
+        ret = False
         current_voltage = data["data"]["Battery Voltage"]["value"]
 
         if self.pre_voltage_ is None:
-            self.pre_voltage_ = current_voltage
-
-            # If the current voltage is already high when the first checking,
-            # returns True and run some procedure.
             if self.full_voltage_ <= current_voltage:
-                return True
+                ret = True
+            self.pre_voltage_ = current_voltage
 
         # If the battery volate run over the limit of highest batery voltate,
         # returns True and run some procedure.
-        if self.pre_voltage_ < self.full_voltage_:
+        elif self.pre_voltage_ < self.full_voltage_:
             if self.full_voltage_ <= current_voltage:
-                return True
+                ret = True
 
-        return False
+        self.pre_voltage_ = current_voltage
+
+        logger.debug("Return {} on {} at {}".format(
+            ret, type(self).__name__, data["at"]))
+
+        return ret
 
 
 class ChargeCurrentHighTrigger(IEventTrigger):
@@ -162,23 +162,23 @@ class ChargeCurrentHighTrigger(IEventTrigger):
         Raises:
             KeyError: Some key doesn't exist in received data.
         """
-
-        logger.debug("Got data on {} at {}".format(type(self).__name__, data["at"]))
-
+        ret = False
         current_charge_value = data["data"]["Charge Current"]["value"]
 
         if self.pre_current_ is None:
-            self.pre_current_ = current_charge_value
-
-            # If the charge current is already high when the first checking,
-            # returns True and run some procedure.
             if self.high_current_ <= current_charge_value:
-                return True
+                ret = True
+            self.pre_current_ = current_charge_value
 
         # If the charge current run over the limit of highest charege current,
         # returns True and run some procedure.
-        if self.pre_current_ < self.high_current_:
+        elif self.pre_current_ < self.high_current_:
             if self.high_current_ <= current_charge_value:
-                return True
+                ret = True
 
-        return False
+        self.pre_current_ = current_charge_value
+
+        logger.debug("Return {} on {} at {}".format(
+            ret, type(self).__name__, data["at"]))
+
+        return ret

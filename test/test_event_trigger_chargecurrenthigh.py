@@ -118,7 +118,8 @@ class TestChargeCurrentHighTrigger(unittest.TestCase):
             hoge_handler.put_q.call_args[0][0]["data"]["Charge Current"]["value"],
             expected_data["data"]["Charge Current"]["value"])
 
-    def test_current_gets_over_intialized_one(self):
+    def test_current_gets_over_intialized_one_more_than_2times(self):
+        """ 閾値を２回以上上回っても、トリガーを発火するのは最初の１回のみ """
         DummyEventHandler = MagicMock(spec=IEventHandler)
 
         event_trigger = ChargeCurrentHighTrigger(high_current=15.0)
@@ -141,6 +142,15 @@ class TestChargeCurrentHighTrigger(unittest.TestCase):
                 "at": datetime.datetime.now().isoformat(),
                 "data": {
                     "Charge Current": {
+                        "value": 15.0,
+                        "unit": "A"
+                    }
+                }
+            },
+            {
+                "at": datetime.datetime.now().isoformat(),
+                "data": {
+                    "Charge Current": {
                         "value": 15.1,
                         "unit": "A"
                     }
@@ -155,10 +165,10 @@ class TestChargeCurrentHighTrigger(unittest.TestCase):
         event_trigger.stop()
         event_trigger.join()
 
-        self.assertEqual(hoge_handler.put_q.call_args[0][0]["at"], expected_data[-1]["at"])
+        self.assertEqual(hoge_handler.put_q.call_args[0][0]["at"], expected_data[-2]["at"])
         self.assertEqual(
             hoge_handler.put_q.call_args[0][0]["data"]["Charge Current"]["value"],
-            expected_data[-1]["data"]["Charge Current"]["value"])
+            expected_data[-2]["data"]["Charge Current"]["value"])
 
 
 if __name__ == "__main__":

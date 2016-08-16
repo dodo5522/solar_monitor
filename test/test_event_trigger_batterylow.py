@@ -35,7 +35,8 @@ class TestBatteryLowTrigger(unittest.TestCase):
             "at": datetime.datetime.now().isoformat(),
             "data": {
                 "Battery Voltage": {
-                    "value": 13.0
+                    "value": 13.0,
+                    "unit": "V"
                 }
             }
         }
@@ -59,7 +60,8 @@ class TestBatteryLowTrigger(unittest.TestCase):
             "at": datetime.datetime.now().isoformat(),
             "data": {
                 "Battery Voltage": {
-                    "value": 11.0
+                    "value": 11.0,
+                    "unit": "V"
                 }
             }
         }
@@ -74,8 +76,8 @@ class TestBatteryLowTrigger(unittest.TestCase):
         self.assertEqual(expected_data["at"], got_data["at"])
         self.assertEqual(expected_data["data"]["Battery Voltage"]["value"], got_data["data"]["Battery Voltage"]["value"])
 
-    def test_low_voltage_from_second_time(self):
-        """  """
+    def test_low_voltage_more_than_2times(self):
+        """ 閾値を２回以上下回っても、トリガーを発火するのは最初の１回のみ """
         batlow_trigger = BatteryLowTrigger(lowest_voltage=12.0)
         batlow_trigger.run_in_condition_ = MagicMock(spec=lambda x: None)
         batlow_trigger.start()
@@ -84,7 +86,8 @@ class TestBatteryLowTrigger(unittest.TestCase):
             "at": datetime.datetime.now().isoformat(),
             "data": {
                 "Battery Voltage": {
-                    "value": 12.0
+                    "value": 12.0,
+                    "unit": "V"
                 }
             }
         }
@@ -92,13 +95,24 @@ class TestBatteryLowTrigger(unittest.TestCase):
             "at": datetime.datetime.now().isoformat(),
             "data": {
                 "Battery Voltage": {
-                    "value": 11.9
+                    "value": 11.9,
+                    "unit": "V"
+                }
+            }
+        }
+        third_data = {
+            "at": datetime.datetime.now().isoformat(),
+            "data": {
+                "Battery Voltage": {
+                    "value": 11.8,
+                    "unit": "V"
                 }
             }
         }
 
         batlow_trigger.put_q(first_data)
         batlow_trigger.put_q(second_data)
+        batlow_trigger.put_q(third_data)
         batlow_trigger.stop()
         batlow_trigger.join()
 
