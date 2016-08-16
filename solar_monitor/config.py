@@ -103,25 +103,25 @@ def init_triggers(**kwargs):
         bat_ful_trigger = BatteryFullTrigger(full_voltage=28.0)
         bat_ful_trigger.append(TweetBotEventHandler(*configs, **kwconfigs))
 
-    # TODO: to see config settings for current high.
-    configs = get_configs(
-        # kwargs["charge_current_high"],
-        kwargs["twitter_consumer_key"],
-        kwargs["twitter_consumer_secret"],
-        kwargs["twitter_key"],
-        kwargs["twitter_secret"])
+    config = kwargs["charge_current_high"],
+    if config:
+        current_high_trigger = ChargeCurrentHighTrigger(high_current=config)
 
-    if configs:
-        kwconfigs = {}
-        kwconfigs["msgs"] = [
-            "太陽が出てきましたかね。本領発揮です。",
-            "充電流量が{VALUE}[{UNIT}]になりました。",
-            "{YEAR}年{MONTH}月{DAY}日{HOUR}時{MINUTE}分に取得したデータを元にしています。"]
-        kwconfigs["value_label"] = "Charge Current"
+        configs = get_configs(
+            kwargs["twitter_consumer_key"],
+            kwargs["twitter_consumer_secret"],
+            kwargs["twitter_key"],
+            kwargs["twitter_secret"])
 
-        # TODO: to see config settings for current high.
-        current_high_trigger = ChargeCurrentHighTrigger(high_current=15.0)
-        bat_ful_trigger.append(TweetBotEventHandler(*configs, **kwconfigs))
+        if configs:
+            kwconfigs = {}
+            kwconfigs["msgs"] = [
+                "太陽が出てきましたかね。本領発揮です。",
+                "充電流量が{VALUE}[{UNIT}]になりました。",
+                "{YEAR}年{MONTH}月{DAY}日{HOUR}時{MINUTE}分に取得したデータを元にしています。"]
+            kwconfigs["value_label"] = "Charge Current"
+
+            current_high_trigger.append(TweetBotEventHandler(*configs, **kwconfigs))
 
     triggers = []
     if "data_updated_trigger" in locals():
