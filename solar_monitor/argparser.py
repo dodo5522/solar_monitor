@@ -103,6 +103,12 @@ def init(argv=sys.argv[1:]):
         help="path to hook sript run at limit of battery"
     )
     arg.add_argument(
+        "-bf", "--battery-full-limit",
+        type=float,
+        nargs='?', default=14.0, const=14.0,
+        help="battery full charged voltage like 14.0"
+    )
+    arg.add_argument(
         "-i", "--interval",
         type=int,
         default=300,
