@@ -27,9 +27,28 @@ Requirement
 
 -  Python3
 -  keen>=0.3.20
--  requests>=2.8.0
 -  tsmppt60-driver>=0.1.3
 -  xively-python>=0.1.0rc1
+
+Detail
+======
+
+Under writing...
+
+Sequence diagram overall
+------------------------
+
+.. figure:: https://raw.githubusercontent.com/dodo5522/solar_monitor/features/%231_doc/doc/sequence.png
+   :alt: 
+
+Class module structure
+----------------------
+
+Database record structure (in future)
+-------------------------------------
+
+.. figure:: https://raw.githubusercontent.com/dodo5522/solar_monitor/6834977418965e02e441b1035174b87a65a7d495/doc/database.png
+   :alt: 
 
 .. |Build Status| image:: https://travis-ci.org/dodo5522/solar_monitor.svg?branch=master
    :target: https://travis-ci.org/dodo5522/solar_monitor
