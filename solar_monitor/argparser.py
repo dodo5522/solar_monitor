@@ -103,6 +103,12 @@ def init(argv=sys.argv[1:]):
         help="path to hook sript run at limit of battery"
     )
     arg.add_argument(
+        "-ch", "--charge-current-high",
+        type=float,
+        nargs='?', default=30.0, const=30.0,
+        help="charge current high limit like 30.0"
+    )
+    arg.add_argument(
         "-i", "--interval",
         type=int,
         default=300,
