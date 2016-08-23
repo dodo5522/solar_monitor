@@ -24,7 +24,16 @@ from solar_monitor.event.base import IEventHandler
 
 
 class SystemHaltEventHandler(IEventHandler):
-    """  """
+    """ The instance should be registered to event trigger of low battery. Run
+        command specified to "cmd" like "./set_event.sh shutdown" when the event
+        triggered.
+
+    Args:
+        cmd: command to be run when the event is triggered.
+        q_max: internal queue size to be used from another thread.
+    Returns:
+        Instance of this class.
+    """
 
     def __init__(self, cmd, q_max=5):
         IEventHandler.__init__(self, q_max=q_max)
@@ -50,7 +59,16 @@ class SystemHaltEventHandler(IEventHandler):
 
 
 class KeenIoEventHandler(IEventHandler):
-    """  """
+    """ The instance should be registered to event trigger for data update.
+        This uploads any data to keenio cloud service.
+
+    Args:
+        project_id: Project ID provided by keenio.
+        write_key: Write key ID provided by keenio.
+        q_max: internal queue size to be used from another thread.
+    Returns:
+        Instance of this class.
+    """
 
     def __init__(self, project_id, write_key, q_max=5):
         IEventHandler.__init__(self, q_max=q_max)
@@ -83,7 +101,16 @@ class KeenIoEventHandler(IEventHandler):
 
 
 class XivelyEventHandler(IEventHandler):
-    """  """
+    """ The instance should be registered to event trigger for data update.
+        This uploads any data to xively cloud service.
+
+    Args:
+        api_key: API key ID provided by xively.
+        feed_key: Feed key ID provided by xively.
+        q_max: internal queue size to be used from another thread.
+    Returns:
+        Instance of this class.
+    """
 
     def __init__(self, api_key, feed_key, q_max=5):
         IEventHandler.__init__(self, q_max=q_max)
