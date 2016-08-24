@@ -25,47 +25,40 @@ class TestKeenioEventHandler(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @unittest.skip
-    def test_exec(self):
-        class _DummyKeenClient(object):
-            pass
+    @patch("solar_monitor.event.handler.KeenClient", autospec=True)
+    def test_post_data_to_keenio(self, mocked_client):
+        client = MagicMock()
+        client.add_events = MagicMock(return_value=None)
+        mocked_client.return_value = client
 
-        # 差分表示の上限をなくす
-        self.maxDiff = None
+        keen_handler = KeenIoEventHandler(
+            project_id='dummy_project_id',
+            write_key='dummy_write_key')
 
-        kc = _DummyKeenClient()
-        kc.add_events = MagicMock(return_value=None)
+        data = {}
+        data['source'] = 'solar'
+        data['at'] = datetime.now()
+        data['data'] = {
+            'Array Current': {'group': 'Array', 'unit': 'A', 'value': 1.0},
+            'Array Voltage': {'group': 'Array', 'unit': 'V', 'value': 50.0}}
 
-        kc_patch = patch('solar_monitor.hook.keenio.KeenClient', autospec=True, return_value=kc)
-        mock_kc = kc_patch.start()
+        keen_handler.start()
+        keen_handler.put_q(data)
+        keen_handler.join_q()
+        keen_handler.stop()
+        keen_handler.join()
 
-        dummy_project_id = 'dummy_project_id'
-        dummy_write_key = 'dummy_write_key'
-        kh = KeenIoHandler(dummy_project_id, dummy_write_key)
+        self.assertTrue(client.add_events.called)
 
-        args = {}
-        args['source'] = 'solar'
-        args['at'] = datetime.now()
-        args['data'] = {
-            'Array Current': {'group': 'Array', 'unit': 'A', 'value': 1.4},
-            'Array Voltage': {'group': 'Array', 'unit': 'V', 'value': 53.41}}
-
-        kh.exec(args)
-
-        kc_patch.stop()
-
-        mock_kc.assert_called_once_with(project_id=dummy_project_id, write_key=dummy_write_key)
-        self.assertEqual(kc.add_events.call_count, 1)
-
-        for items in kc.add_events.call_args[0][0]['offgrid']:
+        for items in client.add_events.call_args[0][0]['offgrid']:
             self.assertIn('keen', items)
             items.pop('keen')
             self.assertEqual('solar', items['source'])
             items.pop('source')
 
-        for items in kc.add_events.call_args[0][0]['offgrid']:
+        for items in client.add_events.call_args[0][0]['offgrid']:
             label = items.pop('label')
-            self.assertEqual(set(args['data'][label].items()), set(items.items()))
+            self.assertEqual(set(data['data'][label].items()), set(items.items()))
 
 
 if __name__ == "__main__":
