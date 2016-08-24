@@ -4,6 +4,7 @@
 import unittest
 from datetime import datetime
 from solar_monitor.event.handler import XivelyEventHandler
+from unittest.mock import call
 from unittest.mock import patch
 from unittest.mock import MagicMock
 
@@ -25,47 +26,43 @@ class TestXivelyEventHandler(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @unittest.skip
-    def test_exec(self):
-        class _DummyKeenClient(object):
-            pass
+    @patch("solar_monitor.event.handler.xively.Datastream", autospec=True)
+    @patch("solar_monitor.event.handler.xively.XivelyAPIClient", autospec=True)
+    def test_post_data_to_xively(self, mocked_api_client, mocked_datastream):
+        client = MagicMock()
+        client.update = MagicMock(return_value=None)
+        api = MagicMock()
+        api.feeds = MagicMock()
+        api.feeds.get = MagicMock(return_value=client)
+        mocked_api_client.return_value = api
 
-        # 差分表示の上限をなくす
-        self.maxDiff = None
+        xively_handler = XivelyEventHandler(
+            api_key="dummy",
+            feed_key="dummy")
 
-        kc = _DummyKeenClient()
-        kc.add_events = MagicMock(return_value=None)
-
-        kc_patch = patch('solar_monitor.hook.keenio.KeenClient', autospec=True, return_value=kc)
-        mock_kc = kc_patch.start()
-
-        dummy_project_id = 'dummy_project_id'
-        dummy_write_key = 'dummy_write_key'
-        kh = KeenIoHandler(dummy_project_id, dummy_write_key)
-
-        args = {}
-        args['source'] = 'solar'
-        args['at'] = datetime.now()
-        args['data'] = {
+        data = {}
+        data['source'] = 'solar'
+        data['at'] = datetime.now()
+        data['data'] = {
             'Array Current': {'group': 'Array', 'unit': 'A', 'value': 1.4},
             'Array Voltage': {'group': 'Array', 'unit': 'V', 'value': 53.41}}
 
-        kh.exec(args)
+        xively_handler.start()
+        xively_handler.put_q(data)
+        xively_handler.join_q()
+        xively_handler.stop()
+        xively_handler.join()
 
-        kc_patch.stop()
+        api.feeds.get.assert_called_once_with("dummy")
 
-        mock_kc.assert_called_once_with(project_id=dummy_project_id, write_key=dummy_write_key)
-        self.assertEqual(kc.add_events.call_count, 1)
+        calls = [
+            call(id="ArrayCurrent", current_value=1.4, at=data["at"]),
+            call(id="ArrayVoltage", current_value=53.41, at=data["at"]),
+        ]
+        mocked_datastream.assert_has_calls(calls, any_order=True)
 
-        for items in kc.add_events.call_args[0][0]['offgrid']:
-            self.assertIn('keen', items)
-            items.pop('keen')
-            self.assertEqual('solar', items['source'])
-            items.pop('source')
-
-        for items in kc.add_events.call_args[0][0]['offgrid']:
-            label = items.pop('label')
-            self.assertEqual(set(args['data'][label].items()), set(items.items()))
+        self.assertEqual(2, len(client.datastreams))
+        client.update.assert_called_once_with()
 
 
 if __name__ == "__main__":
