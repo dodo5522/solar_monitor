@@ -76,13 +76,13 @@ case "$1" in
 	  0|1)
 		do_start
 		case "$?" in
-			0) echo 0 ;;
-			1) echo 1 ;; # Old process is still running
-			*) echo 1 ;; # Failed to start
+			0) echo $(basename $DAEMON) has restarted. ;;
+			1) echo Old process is still running. ;;
+			*) echo Failed to start. ;;
 		esac
 		;;
 	  *)
-		# Failed to stop
+		echo Failed to stop
 		;;
 	esac
 	;;
