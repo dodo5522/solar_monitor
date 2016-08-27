@@ -57,8 +57,35 @@ class TestArgParser(unittest.TestCase):
         self.assertEqual(True, parsed.status_all)
         self.assertEqual(False, parsed.debug)
 
-    def test_first_args(self):
-        argparser.init([])
+    def test_battery_limit(self):
+        parsed = argparser.init(["-bl", ])
+        self.assertEqual(11.5, parsed.battery_limit)
+
+        parsed = argparser.init(["-bl", "10.0"])
+        self.assertEqual(10.0, parsed.battery_limit)
+
+        parsed = argparser.init(["--battery-limit", "20.0"])
+        self.assertEqual(20.0, parsed.battery_limit)
+
+    def test_charge_curent_high(self):
+        parsed = argparser.init(["-ch", ])
+        self.assertEqual(30.0, parsed.charge_current_high)
+
+        parsed = argparser.init(["-ch", "10.0"])
+        self.assertEqual(10.0, parsed.charge_current_high)
+
+        parsed = argparser.init(["--charge-current-high", "20.0"])
+        self.assertEqual(20.0, parsed.charge_current_high)
+
+    def test_battery_full_limit(self):
+        parsed = argparser.init(["-bf", ])
+        self.assertEqual(14.0, parsed.battery_full_limit)
+
+        parsed = argparser.init(["-bf", "10.0"])
+        self.assertEqual(10.0, parsed.battery_full_limit)
+
+        parsed = argparser.init(["--battery-full-limit", "20.0"])
+        self.assertEqual(20.0, parsed.battery_full_limit)
 
 
 if __name__ == "__main__":
