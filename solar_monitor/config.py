@@ -103,7 +103,7 @@ def init_triggers(**kwargs):
 
             bat_ful_trigger.append(TweetBotEventHandler(*configs, **kwconfigs))
 
-    config = kwargs["charge_current_high"],
+    config = kwargs["charge_current_high"]
     if config:
         current_high_trigger = ChargeCurrentHighTrigger(high_current=config)
 
