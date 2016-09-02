@@ -1,13 +1,47 @@
 ' sequence diagram
 @startuml
 hide footbox
-actor Foo1
-boundary Foo2
-control Foo3
-entity Foo4
-database Foo5
-Foo1 -> Foo2 : To boundary
-Foo1 -> Foo3 : To control
-Foo1 -> Foo4 : To entity
-Foo1 -> Foo5 : To database
+actor User
+participant Main
+participant RecursiveTimer
+participant BatteryLowTrigger
+participant BatteryFullTrigger
+participant SystemHaltEventHandler
+participant TweetBotEventHandler
+box "Event Triggers" #LightBlue
+    participant BatteryLowTrigger
+    participant BatteryFullTrigger
+end box
+box "Event Handlers" #LightGreen
+    participant SystemHaltEventHandler
+    participant TweetBotEventHandler
+end box
+
+User -> Main : boot
+activate Main
+
+Main -> BatteryLowTrigger : Run trigger loop.
+activate BatteryLowTrigger
+BatteryLowTrigger -> SystemHaltEventHandler : Run handler loop.
+activate SystemHaltEventHandler 
+BatteryLowTrigger -> TweetBotEventHandler : Run handler loop.
+activate TweetBotEventHandler
+
+Main -> BatteryFullTrigger : Run trigger loop.
+activate BatteryFullTrigger
+BatteryFullTrigger -> TweetBotEventHandler : Run handler loop.
+
+Main -> RecursiveTimer : Run the recursive timer with interval\n set by configuration file.
+activate RecursiveTimer
+RecursiveTimer -> RecursiveTimer : Run the timer event handler.
+activate RecursiveTimer
+loop until killed by main
+RecursiveTimer -> RecursiveTimer : Get data of charge controller.
+RecursiveTimer -> BatteryLowTrigger : Send the data to all trigger object.
+RecursiveTimer -> BatteryFullTrigger
+end
+Main -> RecursiveTimer : Kill
+deactivate RecursiveTimer
+deactivate RecursiveTimer
+deactivate Main
 @enduml
