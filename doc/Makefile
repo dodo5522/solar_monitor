@@ -3,9 +3,9 @@
 PATH_ROOT := ..
 PATH_DOC := $(PATH_ROOT)/doc
 README := $(PATH_ROOT)/README.md
-SEQUENCE := $(PATH_DOC)/sequence.uml
-CLASS := $(PATH_DOC)/class.uml
-DATABASE := $(PATH_DOC)/database.uml
+
+SOURCES := $(addprefix $(PATH_DOC)/,sequence.uml class.uml database.uml)
+DESTS := $(SOURCES:%.uml=%.png)
 
 all:readme uml
 
@@ -21,11 +21,7 @@ readme:$(README_RST)
 $(README_RST):$(README)
 	@pandoc --from=markdown --to=rst -o $(@) $(<)
 
-SEQUENCE_PNG := $(SEQUENCE:%.uml=%.png)
-CLASS_PNG := $(CLASS:%.uml=%.png)
-DATABASE_PNG := $(DATABASE:%.uml=%.png)
-
-uml:$(SEQUENCE_PNG) $(CLASS_PNG) $(DATABASE_PNG)
+uml:$(DESTS)
 
 %.png:%.uml
 	@plantuml -tpng $(<)
