@@ -33,19 +33,19 @@ Requirement
 Sequence diagram overall
 ------------------------
 
-.. figure:: https://raw.githubusercontent.com/dodo5522/solar_monitor/features/%231_doc/doc/sequence.png
+.. figure:: https://raw.githubusercontent.com/dodo5522/solar_monitor/master/doc/sequence.png
    :alt: 
 
 Class module structure
 ----------------------
 
-.. figure:: https://raw.githubusercontent.com/dodo5522/solar_monitor/features/%231_doc/doc/class.png
+.. figure:: https://raw.githubusercontent.com/dodo5522/solar_monitor/master/doc/class.png
    :alt: 
 
 Database record structure (in future)
 -------------------------------------
 
-.. figure:: https://raw.githubusercontent.com/dodo5522/solar_monitor/features/%231_doc/doc/database.png
+.. figure:: https://raw.githubusercontent.com/dodo5522/solar_monitor/master/doc/database.png
    :alt: 
 
 .. |Build Status| image:: https://travis-ci.org/dodo5522/solar_monitor.svg?branch=master
