@@ -22,25 +22,62 @@ activate Main
 
 Main -> BatteryLowTrigger : Run trigger loop.
 activate BatteryLowTrigger
+Main -> BatteryFullTrigger
+activate BatteryFullTrigger
+
 BatteryLowTrigger -> SystemHaltEventHandler : Run handler loop.
 activate SystemHaltEventHandler 
-BatteryLowTrigger -> TweetBotEventHandler : Run handler loop.
+BatteryLowTrigger -> TweetBotEventHandler
 activate TweetBotEventHandler
+BatteryFullTrigger -> TweetBotEventHandler
 
-Main -> BatteryFullTrigger : Run trigger loop.
-activate BatteryFullTrigger
-BatteryFullTrigger -> TweetBotEventHandler : Run handler loop.
-
-Main -> RecursiveTimer : Run the recursive timer with interval\n set by configuration file.
+Main -> RecursiveTimer : Run the recursive timer.
 activate RecursiveTimer
 RecursiveTimer -> RecursiveTimer : Run the timer event handler.
 activate RecursiveTimer
-loop until killed by main
-RecursiveTimer -> RecursiveTimer : Get data of charge controller.
-RecursiveTimer -> BatteryLowTrigger : Send the data to all trigger object.
-RecursiveTimer -> BatteryFullTrigger
+
+loop Until terminated by main
+    RecursiveTimer -> RecursiveTimer : Get data of charge controller.
+    RecursiveTimer -> BatteryLowTrigger : Send the data to all trigger object.
+    RecursiveTimer -> BatteryFullTrigger
+
+    BatteryLowTrigger -> BatteryLowTrigger : 
+    activate BatteryLowTrigger
+    alt Battery voltage getting lower than configuraton
+        BatteryLowTrigger -> SystemHaltEventHandler : Tell the condition getting worse.
+        activate SystemHaltEventHandler
+        SystemHaltEventHandler ->] : Switch power off some devices set by configration.
+        deactivate SystemHaltEventHandler
+        BatteryLowTrigger -> TweetBotEventHandler : Tell the condition getting worse.
+        activate TweetBotEventHandler
+        TweetBotEventHandler ->] : Tweet the condition\n getting worse.
+        deactivate TweetBotEventHandler
+    end
+    deactivate BatteryLowTrigger
+
+    BatteryFullTrigger -> BatteryFullTrigger  : 
+    activate BatteryFullTrigger
+    alt Battery voltage getting higher as full
+        BatteryFullTrigger -> TweetBotEventHandler : Tell the condition.
+        activate TweetBotEventHandler
+        TweetBotEventHandler ->] : Tweet the battery\n full condition.
+        deactivate TweetBotEventHandler
+    end
+    deactivate BatteryFullTrigger
 end
-Main -> RecursiveTimer : Kill
+
+User -> Main : Terminate.
+Main -> BatteryLowTrigger : Terminate triggers.
+Main -> BatteryFullTrigger
+BatteryLowTrigger -> SystemHaltEventHandler : Terminate handlers.
+deactivate SystemHaltEventHandler
+BatteryLowTrigger -> TweetBotEventHandler
+deactivate TweetBotEventHandler
+deactivate BatteryLowTrigger
+BatteryFullTrigger -> TweetBotEventHandler : Terminate handlers.
+deactivate BatteryFullTrigger
+
+Main -> RecursiveTimer : Terminate
 deactivate RecursiveTimer
 deactivate RecursiveTimer
 deactivate Main
