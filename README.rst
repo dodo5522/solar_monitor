@@ -20,7 +20,7 @@ How to install
 How to configure
 ================
 
-1. Under writing...
+1. Customize /etc/defaults/solar\_monitor
 
 Requirement
 ===========
@@ -29,11 +29,6 @@ Requirement
 -  keen>=0.3.20
 -  tsmppt60-driver>=0.1.3
 -  xively-python>=0.1.0rc1
-
-Detail
-======
-
-Under writing...
 
 Sequence diagram overall
 ------------------------
