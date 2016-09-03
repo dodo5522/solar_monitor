@@ -44,10 +44,13 @@ Sequence diagram overall
 Class module structure
 ----------------------
 
+.. figure:: https://raw.githubusercontent.com/dodo5522/solar_monitor/features/%231_doc/doc/class.png
+   :alt: 
+
 Database record structure (in future)
 -------------------------------------
 
-.. figure:: https://raw.githubusercontent.com/dodo5522/solar_monitor/6834977418965e02e441b1035174b87a65a7d495/doc/database.png
+.. figure:: https://raw.githubusercontent.com/dodo5522/solar_monitor/features/%231_doc/doc/database.png
    :alt: 
 
 .. |Build Status| image:: https://travis-ci.org/dodo5522/solar_monitor.svg?branch=master

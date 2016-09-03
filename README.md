@@ -34,6 +34,8 @@ Under writing...
 
 ## Class module structure
 
+![](https://raw.githubusercontent.com/dodo5522/solar_monitor/features/%231_doc/doc/class.png)
+
 ## Database record structure (in future)
 
-![](https://raw.githubusercontent.com/dodo5522/solar_monitor/6834977418965e02e441b1035174b87a65a7d495/doc/database.png)
+![](https://raw.githubusercontent.com/dodo5522/solar_monitor/features/%231_doc/doc/database.png)
