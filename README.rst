@@ -20,16 +20,33 @@ How to install
 How to configure
 ================
 
-1. Under writing...
+1. Customize /etc/defaults/solar\_monitor
 
 Requirement
 ===========
 
 -  Python3
 -  keen>=0.3.20
--  requests>=2.8.0
 -  tsmppt60-driver>=0.1.3
 -  xively-python>=0.1.0rc1
+
+Sequence diagram overall
+------------------------
+
+.. figure:: https://raw.githubusercontent.com/dodo5522/solar_monitor/features/%231_doc/doc/sequence.png
+   :alt: 
+
+Class module structure
+----------------------
+
+.. figure:: https://raw.githubusercontent.com/dodo5522/solar_monitor/features/%231_doc/doc/class.png
+   :alt: 
+
+Database record structure (in future)
+-------------------------------------
+
+.. figure:: https://raw.githubusercontent.com/dodo5522/solar_monitor/features/%231_doc/doc/database.png
+   :alt: 
 
 .. |Build Status| image:: https://travis-ci.org/dodo5522/solar_monitor.svg?branch=master
    :target: https://travis-ci.org/dodo5522/solar_monitor

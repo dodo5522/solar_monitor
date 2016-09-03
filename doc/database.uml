@@ -1,0 +1,45 @@
+' class diagram
+@startuml
+!define table(x) class x << (T,#FFAAAA) >>
+!define primary_key(x) <u>x</u>
+hide methods
+
+table(geo) {
+    primary_key(integer ix)
+    real longitude
+    real latitude
+}
+
+table(source) {
+    primary_key(integer ix)
+    text name
+    text type
+}
+
+table(data) {
+    primary_key(integer ix)
+    text label
+    real value
+    text unit
+    text timestamp
+}
+
+table(data_group) {
+    primary_key(integer ix)
+    text name
+}
+
+table(record) {
+    primary_key(integer ix)
+    integer data_ix
+    integer data_group_ix
+    integer source_ix
+    integer geo_ix
+    text created_at
+}
+
+record *-- data
+record *-- data_group
+record *-- source
+record *-- geo
+@enduml

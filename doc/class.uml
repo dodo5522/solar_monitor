@@ -1,0 +1,80 @@
+' class diagram
+@startuml
+
+package event #DDDDDD {
+    package base #FFFFFF {
+        class IEventListener {
+            #q_
+            #thread_
+            +start()
+            +stop()
+            +join()
+            +put_q()
+            +join_q()
+            #thread_main()
+            #is_condition()
+            #run_in_condition()
+        }
+        class IEventTrigger {
+            #event_handlers
+            +start() {redefines start()}
+            +stop() {redefines stop()}
+            +join() {redefines join()}
+            +append()
+            #is_condition() {redefines is_condition()}
+            #run_in_condition() {redefines run_in_condition()}
+        }
+        class IEventHandler {
+            #run()
+            #is_condition() {redefines is_condition()}
+            #run_in_condition() {redefines run_in_condition()}
+        }
+
+        IEventListener <|-- IEventTrigger
+        IEventListener <|-- IEventHandler
+    }
+
+    package trigger #FFFFFF {
+        class DataIsUpdatedTrigger {
+        }
+        class BatteryLowTrigger {
+        }
+        class BatteryFullTrigger {
+        }
+        class ChargeCurrentHighTrigger {
+        }
+
+        IEventTrigger <|-- DataIsUpdatedTrigger
+        IEventTrigger <|-- BatteryLowTrigger
+        IEventTrigger <|-- BatteryFullTrigger
+        IEventTrigger <|-- ChargeCurrentHighTrigger
+    }
+
+    package handler #FFFFFF {
+        class SystemHaltEventHandler {
+        }
+        class KeenIoEventHandler {
+        }
+        class XivelyEventHandler {
+        }
+        class TweetBotEventHandler {
+        }
+
+        IEventHandler <|-- SystemHaltEventHandler
+        IEventHandler <|-- KeenIoEventHandler
+        IEventHandler <|-- XivelyEventHandler
+        IEventHandler <|-- TweetBotEventHandler
+    }
+}
+
+package timer #DDDDDD {
+    class RecursiveTimer {
+    }
+}
+
+package logger #DDDDDD {
+}
+
+package argparse #DDDDDD {
+}
+@enduml
