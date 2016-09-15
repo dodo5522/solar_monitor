@@ -127,6 +127,7 @@ def main():
             time.sleep(10)
     except KeyboardInterrupt:
         logger.debug("monitor program will be killed by user.")
+        raise
     except:
         e = sys.exc_info()
         logger.debug("Another exception: " + str(e[0]) + " is raised.")
