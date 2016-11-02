@@ -30,9 +30,8 @@ def init(argv=sys.argv[1:]):
     arg = argparse.ArgumentParser(
         description="main program to test TS-MPPT-60 monitor modules")
     arg.add_argument(
-        "-n", "--host-name",
+        "host_name",
         type=str,
-        default="192.168.1.20",
         help="TS-MPPT-60 host address"
     )
     arg.add_argument(
