@@ -80,9 +80,12 @@ def event_loop(**kwargs):
     Exceptions:
         queue.Full: If queue of event handler is full
     """
-    host_name = kwargs["host_name"]
-    is_status_all = kwargs["status_all"]
-    triggers = kwargs["triggers"]
+    host_name = kwargs.get("host_name")
+    is_status_all = kwargs.get("status_all")
+    triggers = kwargs.get("triggers")
+
+    if None in (host_name, is_status_all, triggers):
+        return
 
     now = datetime.datetime.utcnow()
     system_status = CHARGE_CONTROLLER.SystemStatus(host_name)
