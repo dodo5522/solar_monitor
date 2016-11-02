@@ -118,11 +118,9 @@ def main():
     triggers = config.init_triggers(**kwargs)
     start_triggers(triggers)
 
-    kwargs = {}
-    kwargs["host_name"] = args.host_name
-    kwargs["status_all"] = args.status_all
-    kwargs["triggers"] = triggers
-    timer = RecursiveTimer(args.interval, event_loop, **kwargs)
+    timer = RecursiveTimer(
+        args.interval, event_loop,
+        host_name=args.host_name, status_all=args.status_all, triggers=triggers)
 
     try:
         timer.start()
