@@ -69,38 +69,61 @@ def put_to_triggers(triggers, data):
         trigger.join_q()
 
 
-def event_loop(**kwargs):
+def get_controller_status(host, is_all=True, is_debug=False):
+    """ Get the charge controller status.
+
+    Args:
+        host: host name or address like 192.168.1.20
+        is_all: get all status data if True
+        is_debug: dump the got data if True
+    Returns:
+        Got data from charge controller
+    Exceptions:
+        requests.exceptions.ConnectTimeout
+        requests.exceptions.ConnectionError
+        requests.exceptions.HTTPError
+        requests.exceptions.ReadTimeout
+        requests.exceptions.RequestException
+        requests.exceptions.RetryError
+        requests.exceptions.SSLError
+        requests.exceptions.Timeout
+        requests.exceptions.TooManyRedirects
+    """
+    system_status = CHARGE_CONTROLLER.SystemStatus(host)
+    got_data = system_status.get(is_all)
+
+    if is_debug:
+        for key, data in got_data.items():
+            logger.info(
+                "{group}, {elem}, {value}[{unit}]".format(
+                    group=data["group"], elem=key,
+                    value=str(data["value"]), unit=data["unit"]))
+
+    return got_data
+
+
+def timer_handler(host, triggers=[], is_all=True, is_debug=False):
     """ Monitor charge controller and update database like xively or
         internal database. This method should be called with a timer.
 
     Args:
-        kwargs: keyword argument object
+        host: host name or address like 192.168.1.20
+        triggers: event trigger class objects
+        is_all: get all status data if True
+        is_debug: dump the got data if True
     Returns:
         None
     Exceptions:
         queue.Full: If queue of event handler is full
     """
-    host_name = kwargs.get("host_name")
-    is_status_all = kwargs.get("status_all")
-    triggers = kwargs.get("triggers")
 
-    if None in (host_name, is_status_all, triggers):
+    if None in (host, is_all):
         return
-
-    now = datetime.datetime.utcnow()
-    system_status = CHARGE_CONTROLLER.SystemStatus(host_name)
-    got_data = system_status.get(is_status_all)
 
     rawdata = {}
     rawdata["source"] = "solar"
-    rawdata["data"] = got_data
-    rawdata["at"] = now
-
-    for key, data in got_data.items():
-        logger.info(
-            "{date}: {group}, {elem}, {value}[{unit}]".format(
-                date=now, group=data["group"], elem=key,
-                value=str(data["value"]), unit=data["unit"]))
+    rawdata["at"] = datetime.datetime.utcnow()
+    rawdata["data"] = get_controller_status(host, is_all, is_debug)
 
     put_to_triggers(triggers, rawdata)
 
@@ -112,15 +135,15 @@ def main():
     logger.configure(path_file=args.log_file, is_debug=args.debug)
 
     if args.just_get_status:
-        event_loop(**kwargs)
+        get_controller_status(host=args.host_name, is_all=args.status_all, is_debug=True)
         return
 
     triggers = config.init_triggers(**kwargs)
     start_triggers(triggers)
 
     timer = RecursiveTimer(
-        args.interval, event_loop,
-        host_name=args.host_name, status_all=args.status_all, triggers=triggers)
+        args.interval, timer_handler,
+        host=args.host_name, is_all=args.status_all, triggers=triggers, is_debug=args.debug)
 
     try:
         timer.start()
