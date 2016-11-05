@@ -118,10 +118,6 @@ def timer_handler(host, triggers=[], is_all=True, is_debug=False):
     Exceptions:
         queue.Full: If queue of event handler is full
     """
-
-    if None in (host, is_all):
-        return
-
     rawdata = {}
     rawdata["source"] = "solar"
     rawdata["at"] = datetime.datetime.utcnow()
