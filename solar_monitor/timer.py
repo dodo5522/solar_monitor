@@ -112,7 +112,8 @@ class RecursiveTimer(object):
             try:
                 self.target_func(**self.target_kwargs)
             except Exception as e:
-                logger.debug(str(e) + ' error!!!')
+                logger.error("Exception raised at running target function: " + type(e).__name__)
+                logger.error("Detail: " + str(e))
 
     def start(self):
         """Start the timer thread.

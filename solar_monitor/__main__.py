@@ -61,6 +61,8 @@ def put_to_triggers(triggers, data):
         data: data object to be put to all trigger.
     Returns:
         None
+    Exceptions:
+        queue.Full: If queue of event handler is full
     """
     for trigger in triggers:
         trigger.put_q(data)
@@ -135,8 +137,14 @@ def main():
     logger.configure(path_file=args.log_file, is_debug=args.debug)
 
     if args.just_get_status:
-        get_controller_status(host=args.host_name, is_all=args.status_all, is_debug=True)
-        return
+        try:
+            get_controller_status(
+                host=args.host_name, is_all=args.status_all, is_debug=True)
+        except Exception as e:
+            logger.error("Exception raised at just getting status: " + type(e).__name__)
+            logger.error("Detail: " + str(e))
+        finally:
+            return
 
     triggers = config.init_triggers(**kwargs)
     start_triggers(triggers)
@@ -144,9 +152,9 @@ def main():
     timer = RecursiveTimer(
         args.interval, timer_handler,
         host=args.host_name, is_all=args.status_all, triggers=triggers, is_debug=args.debug)
+    timer.start()
 
     try:
-        timer.start()
         while True:
             time.sleep(10)
     except KeyboardInterrupt:
@@ -154,7 +162,8 @@ def main():
         raise
     except:
         e = sys.exc_info()
-        logger.debug("Another exception: " + str(e[0]) + " is raised.")
+        logger.debug("Another exception raised: " + type(e[0]).__name__)
+        logger.debug("Detail: " + str(e[0]))
         raise
     finally:
         timer.cancel()
