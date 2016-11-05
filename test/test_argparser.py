@@ -35,7 +35,10 @@ class TestArgParser(unittest.TestCase):
         pass
 
     def test_default_args(self):
-        parsed = argparser.init([])
+        self.assertRaises(SystemExit, argparser.init, [])
+
+    def test_optional_args(self):
+        parsed = argparser.init(["192.168.1.20"])
 
         self.assertEqual("192.168.1.20", parsed.host_name)
         self.assertEqual(None, parsed.xively_api_key)
